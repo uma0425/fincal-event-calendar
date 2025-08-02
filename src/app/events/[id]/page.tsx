@@ -1,4 +1,5 @@
-import { Metadata } from 'next'
+'use client'
+
 import { notFound } from 'next/navigation'
 import { formatDate, formatTime, getEventTypeLabel, getEventTypeColor, formatFee } from '@/lib/utils'
 import { Calendar, MapPin, Users, ExternalLink, ArrowLeft } from 'lucide-react'
@@ -15,94 +16,6 @@ interface EventDetailPageProps {
   }
 }
 
-// 構造化データ生成
-function generateStructuredData(event: any) {
-  const eventDate = new Date(event.startAt)
-  const endDate = new Date(event.endAt)
-  
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Event',
-    name: event.title,
-    description: event.description || `${getEventTypeLabel(event.type)}イベント`,
-    startDate: eventDate.toISOString(),
-    endDate: endDate.toISOString(),
-    location: {
-      '@type': 'Place',
-      name: event.place,
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: event.prefecture || '未設定',
-        addressCountry: 'JP'
-      }
-    },
-    organizer: {
-      '@type': 'Organization',
-      name: event.organizer
-    },
-    eventType: getEventTypeLabel(event.type),
-    offers: {
-      '@type': 'Offer',
-      price: event.fee || 0,
-      priceCurrency: 'JPY',
-      availability: 'https://schema.org/InStock'
-    },
-    url: `https://fincal.example.com/events/${event.id}`,
-    image: event.imageUrl,
-    inLanguage: 'ja',
-    audience: {
-      '@type': 'Audience',
-      audienceType: event.target.join(', ')
-    }
-  }
-}
-
-// 動的メタデータ生成
-export async function generateMetadata({ params }: EventDetailPageProps): Promise<Metadata> {
-  const event = demoEvents.find(e => e.id === params.id)
-  
-  if (!event) {
-    return {
-      title: 'イベントが見つかりません',
-      description: 'お探しのイベントは存在しないか、削除された可能性があります。',
-    }
-  }
-
-  const eventDate = new Date(event.startAt)
-  const formattedDate = formatDate(eventDate)
-  const formattedTime = formatTime(eventDate)
-  const eventTypeLabel = getEventTypeLabel(event.type)
-  const feeText = formatFee(event.fee)
-
-  return {
-    title: event.title,
-    description: `${event.description || `${eventTypeLabel}イベント`} - ${formattedDate} ${formattedTime}開催 - ${event.place} - ${feeText}`,
-    openGraph: {
-      title: `${event.title} | FinCal`,
-      description: event.description || `${eventTypeLabel}イベント`,
-      type: 'article',
-      url: `https://fincal.example.com/events/${event.id}`,
-      images: event.imageUrl ? [
-        {
-          url: event.imageUrl,
-          width: 1200,
-          height: 630,
-          alt: event.title,
-        }
-      ] : undefined,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${event.title} | FinCal`,
-      description: event.description || `${eventTypeLabel}イベント`,
-      images: event.imageUrl ? [event.imageUrl] : undefined,
-    },
-    alternates: {
-      canonical: `https://fincal.example.com/events/${event.id}`,
-    },
-  }
-}
-
 export default function EventDetailPage({ params }: EventDetailPageProps) {
   // デモデータからイベントを検索
   const event = demoEvents.find(e => e.id === params.id)
@@ -111,16 +24,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     notFound()
   }
 
-  const structuredData = generateStructuredData(event)
-
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData),
-        }}
-      />
     <div className="max-w-4xl mx-auto px-4 sm:px-0">
       {/* 戻るボタン */}
       <div className="mb-4 sm:mb-6">
@@ -275,6 +179,5 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         </div>
       </div>
     </div>
-    </>
   )
 }

@@ -2,7 +2,6 @@
 
 import EventSubmitForm from '@/components/forms/EventSubmitForm'
 
-
 export default function SubmitPage() {
   return (
     <div className="max-w-4xl mx-auto">

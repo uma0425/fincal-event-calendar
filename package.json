@@ -8,8 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build --no-static",
-    "build:with-db": "prisma generate && next build --no-static",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
