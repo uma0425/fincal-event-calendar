@@ -1,97 +1,59 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Event } from '@/types'
 
-interface UseFavoritesReturn {
-  favorites: Event[]
-  loading: boolean
-  error: string | null
-  addFavorite: (eventId: string) => Promise<void>
-  removeFavorite: (eventId: string) => Promise<void>
-  isFavorite: (eventId: string) => boolean
-  refetch: () => void
-}
-
-export function useFavorites(userId: string): UseFavoritesReturn {
-  const [favorites, setFavorites] = useState<Event[]>([])
-  const [loading, setLoading] = useState(true)
+export function useFavorites() {
+  const [favorites, setFavorites] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // ローカルストレージからお気に入りを読み込み
   const fetchFavorites = useCallback(async () => {
-    if (!userId) {
-      setFavorites([])
-      setLoading(false)
-      return
-    }
-
+    setLoading(true)
+    setError(null)
+    
     try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(`/api/favorites?userId=${userId}`)
-      const result = await response.json()
-
-      if (!result.success) {
-        throw new Error(result.error || 'お気に入りの取得に失敗しました')
+      const stored = localStorage.getItem('favorites')
+      if (stored) {
+        setFavorites(JSON.parse(stored))
       }
-
-      setFavorites(result.data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'お気に入りの取得に失敗しました')
+      setError('お気に入りの取得に失敗しました')
     } finally {
       setLoading(false)
     }
-  }, [userId])
+  }, [])
 
+  // お気に入りを追加
   const addFavorite = useCallback(async (eventId: string) => {
-    if (!userId) return
-
     try {
-      const response = await fetch('/api/favorites', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, eventId }),
-      })
-
-      const result = await response.json()
-
-      if (!result.success) {
-        throw new Error(result.error || 'お気に入りの追加に失敗しました')
-      }
-
-      // お気に入りリストを更新
-      await fetchFavorites()
+      const newFavorites = [...favorites, eventId]
+      setFavorites(newFavorites)
+      localStorage.setItem('favorites', JSON.stringify(newFavorites))
+      return { success: true }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'お気に入りの追加に失敗しました')
+      setError('お気に入りの追加に失敗しました')
+      return { success: false, error: 'お気に入りの追加に失敗しました' }
     }
-  }, [userId, fetchFavorites])
-
-  const removeFavorite = useCallback(async (eventId: string) => {
-    if (!userId) return
-
-    try {
-      const response = await fetch(`/api/favorites?userId=${userId}&eventId=${eventId}`, {
-        method: 'DELETE',
-      })
-
-      const result = await response.json()
-
-      if (!result.success) {
-        throw new Error(result.error || 'お気に入りの削除に失敗しました')
-      }
-
-      // お気に入りリストを更新
-      await fetchFavorites()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'お気に入りの削除に失敗しました')
-    }
-  }, [userId, fetchFavorites])
-
-  const isFavorite = useCallback((eventId: string) => {
-    return favorites.some(event => event.id === eventId)
   }, [favorites])
 
+  // お気に入りを削除
+  const removeFavorite = useCallback(async (eventId: string) => {
+    try {
+      const newFavorites = favorites.filter(id => id !== eventId)
+      setFavorites(newFavorites)
+      localStorage.setItem('favorites', JSON.stringify(newFavorites))
+      return { success: true }
+    } catch (err) {
+      setError('お気に入りの削除に失敗しました')
+      return { success: false, error: 'お気に入りの削除に失敗しました' }
+    }
+  }, [favorites])
+
+  // お気に入りかどうかチェック
+  const isFavorite = useCallback((eventId: string) => {
+    return favorites.includes(eventId)
+  }, [favorites])
+
+  // お気に入りを再取得
   const refetch = useCallback(() => {
     fetchFavorites()
   }, [fetchFavorites])
