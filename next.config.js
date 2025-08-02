@@ -18,11 +18,14 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   
-  // 静的ページ生成を完全に無効化
-  generateStaticParams: false,
-  
   // ビルド時のタイムアウトを延長
   staticPageGenerationTimeout: 300,
+  
+  // 本番環境での安定性向上
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
   
   // Webpack設定
   webpack: (config, { isServer }) => {
@@ -35,6 +38,23 @@ const nextConfig = {
           openAnalyzer: false,
         })
       )
+    }
+    
+    // 本番環境での最適化
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+            },
+          },
+        },
+      }
     }
     
     return config

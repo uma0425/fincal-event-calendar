@@ -1,4 +1,7 @@
-import { EventStatus, EventType } from '@prisma/client'
+// 独自の型定義（Prismaに依存しない）
+export type EventStatus = 'pending' | 'published' | 'rejected'
+export type EventType = 'seminar' | 'webinar' | 'meetup' | 'workshop' | 'other'
+export type UserRole = 'user' | 'admin'
 
 export interface Event {
   id: string
@@ -56,5 +59,5 @@ export interface EventFilter {
 export interface User {
   id: string
   email: string
-  role?: 'user' | 'moderator' | 'admin'
+  role?: UserRole
 } 

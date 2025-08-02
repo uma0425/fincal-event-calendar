@@ -33,87 +33,96 @@ function HomePageContent() {
 
   // フィルタリングとソート
   const filteredEvents = useMemo(() => {
-    let events = [...demoEvents]
+    try {
+      let events = [...demoEvents]
 
-    // 検索フィルター
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase()
-      events = events.filter(event =>
-        event.title.toLowerCase().includes(searchLower) ||
-        event.description?.toLowerCase().includes(searchLower) ||
-        event.organizer.toLowerCase().includes(searchLower) ||
-        event.place.toLowerCase().includes(searchLower)
-      )
-    }
+      // 検索フィルター
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase()
+        events = events.filter(event =>
+          event.title.toLowerCase().includes(searchLower) ||
+          event.description?.toLowerCase().includes(searchLower) ||
+          event.organizer.toLowerCase().includes(searchLower) ||
+          event.place.toLowerCase().includes(searchLower)
+        )
+      }
 
-    // お気に入りフィルター
-    if (filters.favoritesOnly) {
-      events = events.filter(event => favorites.includes(event.id))
-    }
+      // お気に入りフィルター
+      if (filters.favoritesOnly) {
+        events = events.filter(event => favorites.includes(event.id))
+      }
 
-    // カテゴリフィルター
-    if (filters.categories.length > 0) {
-      events = events.filter(event => filters.categories.includes(event.type))
-    }
+      // カテゴリフィルター
+      if (filters.categories.length > 0) {
+        events = events.filter(event => filters.categories.includes(event.type))
+      }
 
-    // 参加形式フィルター
-    if (filters.participationFormat.length > 0) {
-      events = events.filter(event => {
-        const isOnline = event.place.toLowerCase().includes('オンライン')
-        return filters.participationFormat.includes(isOnline ? 'online' : 'offline')
-      })
-    }
-
-    // 日付フィルター
-    const now = new Date()
-    switch (filters.datePeriod) {
-      case 'today':
+      // 参加形式フィルター
+      if (filters.participationFormat.length > 0) {
         events = events.filter(event => {
-          const eventDate = new Date(event.startAt)
-          return eventDate.toDateString() === now.toDateString()
+          const isOnline = event.place.toLowerCase().includes('オンライン')
+          return filters.participationFormat.includes(isOnline ? 'online' : 'offline')
         })
-        break
-      case 'week':
-        const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-        events = events.filter(event => {
-          const eventDate = new Date(event.startAt)
-          return eventDate >= now && eventDate <= weekFromNow
-        })
-        break
-      case 'month':
-        const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-        events = events.filter(event => {
-          const eventDate = new Date(event.startAt)
-          return eventDate >= now && eventDate <= monthFromNow
-        })
-        break
-    }
+      }
 
-    // ソート
-    events.sort((a, b) => {
-      let comparison = 0
-      switch (filters.sortBy) {
-        case 'startAt':
-          comparison = new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
+      // 日付フィルター
+      const now = new Date()
+      switch (filters.datePeriod) {
+        case 'today':
+          events = events.filter(event => {
+            const eventDate = new Date(event.startAt)
+            return eventDate.toDateString() === now.toDateString()
+          })
           break
-        case 'title':
-          comparison = a.title.localeCompare(b.title)
+        case 'week':
+          const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+          events = events.filter(event => {
+            const eventDate = new Date(event.startAt)
+            return eventDate >= now && eventDate <= weekFromNow
+          })
           break
-        case 'fee':
-          comparison = (a.fee || 0) - (b.fee || 0)
-          break
-        case 'popularity':
-          comparison = (a.maxParticipants || 0) - (b.maxParticipants || 0)
+        case 'month':
+          const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+          events = events.filter(event => {
+            const eventDate = new Date(event.startAt)
+            return eventDate >= now && eventDate <= monthFromNow
+          })
           break
       }
-      return filters.sortOrder === 'asc' ? comparison : -comparison
-    })
 
-    return events
+      // ソート
+      events.sort((a, b) => {
+        let comparison = 0
+        switch (filters.sortBy) {
+          case 'startAt':
+            comparison = new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
+            break
+          case 'title':
+            comparison = a.title.localeCompare(b.title)
+            break
+          case 'fee':
+            comparison = (a.fee || 0) - (b.fee || 0)
+            break
+          case 'popularity':
+            comparison = (a.maxParticipants || 0) - (b.maxParticipants || 0)
+            break
+        }
+        return filters.sortOrder === 'asc' ? comparison : -comparison
+      })
+
+      return events
+    } catch (error) {
+      console.error('フィルタリングエラー:', error)
+      return demoEvents
+    }
   }, [filters, favorites])
 
   const handleFiltersChange = useCallback((newFilters: Partial<FilterState>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }))
+    try {
+      setFilters(prev => ({ ...prev, ...newFilters }))
+    } catch (error) {
+      console.error('フィルター変更エラー:', error)
+    }
   }, [])
 
   return (

@@ -1,4 +1,4 @@
-import { EventType } from '@prisma/client'
+import { EventType } from '@/types'
 
 export function formatDate(date: Date): string {
   return new Intl.DateTimeFormat('ja-JP', {

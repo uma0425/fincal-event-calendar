@@ -1,19 +1,9 @@
-import { PrismaClient } from '@prisma/client'
-
-// 一時的にPrismaクライアントを無効化
-// const globalForPrisma = globalThis as unknown as {
-//   prisma: PrismaClient | undefined
-// }
-
-// export const prisma = globalForPrisma.prisma ?? new PrismaClient()
-
-// if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-
-// 一時的なダミークライアント
+// 完全にPrismaを無効化
 export const prisma = {
   event: {
     findMany: async () => [],
     findFirst: async () => null,
+    findUnique: async () => null,
     create: async () => ({}),
     update: async () => ({}),
     delete: async () => ({}),
@@ -21,10 +11,14 @@ export const prisma = {
   user: {
     findMany: async () => [],
     findFirst: async () => null,
+    findUnique: async () => null,
     create: async () => ({}),
+    update: async () => ({}),
+    delete: async () => ({}),
   },
   favorite: {
     findMany: async () => [],
+    findUnique: async () => null,
     create: async () => ({}),
     delete: async () => ({}),
   },
