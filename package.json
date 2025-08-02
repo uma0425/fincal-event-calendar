@@ -23,7 +23,6 @@
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
     "@prisma/client": "^5.22.0",
-    "@tailwindcss/line-clamp": "^0.4.4",
     "date-fns": "^3.0.6",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.294.0",
