@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors;
+  }
+  
+  .btn-primary {
+    @apply text-white bg-primary-600 hover:bg-primary-700 focus:ring-primary-500;
+  }
+  
+  .btn-secondary {
+    @apply text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-primary-500;
+  }
+  
+  .btn-outline {
+    @apply text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-primary-500;
+  }
+  
+  .input {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200;
+  }
+  
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+  
+  .card-body {
+    @apply px-6 py-4;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+  
+  .card-header,
+  .card-body {
+    @apply px-4 py-3;
+  }
+  
+  /* モバイルでのナビゲーション */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40;
+  }
+  
+  .mobile-nav-item {
+    @apply flex flex-col items-center py-2 px-3 text-xs;
+  }
+  
+  /* モバイルでのカレンダーグリッド */
+  .mobile-calendar-grid {
+    @apply grid-cols-1;
+  }
+  
+  /* モバイルでのフィルター */
+  .mobile-filter {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 transform transition-transform duration-300;
+  }
+  
+  .mobile-filter.hidden {
+    @apply translate-y-full;
+  }
+  
+  /* モバイルでの通知 */
+  .mobile-notification {
+    @apply fixed top-4 left-4 right-4 z-50;
+  }
+}
+
+/* タッチデバイス対応 */
+@media (hover: none) and (pointer: coarse) {
+  .btn {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .input {
+    @apply min-h-[44px];
+  }
+  
+  /* タッチターゲットの最小サイズ */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* ダークモード対応（将来の拡張用） */
+@media (prefers-color-scheme: dark) {
+  /* ダークモードのスタイルをここに追加 */
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* スクロールバーのカスタマイズ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* フォーカス表示の改善 */
+.focus-visible:focus {
+  @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+}
+
+/* 印刷対応 */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-before: always;
+  }
+} 
