@@ -28,9 +28,12 @@ const EventFilter = dynamic(() => import('./calendar/EventFilter'), {
 })
 
 interface LazyEventFilterProps {
-  onFilterChange: (filters: FilterState) => void
+  filters: FilterState
+  onFiltersChange: (newFilters: Partial<FilterState>) => void
+  totalEvents: number
+  filteredCount: number
 }
 
-export default function LazyEventFilter({ onFilterChange }: LazyEventFilterProps) {
-  return <EventFilter onFilterChange={onFilterChange} />
+export default function LazyEventFilter({ filters, onFiltersChange, totalEvents, filteredCount }: LazyEventFilterProps) {
+  return <EventFilter onFiltersChange={onFiltersChange} />
 } 

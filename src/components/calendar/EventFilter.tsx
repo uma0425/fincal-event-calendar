@@ -6,7 +6,7 @@ import { FilterState } from '@/types/filter'
 import { useFavorites } from '@/contexts/FavoriteContext'
 
 interface EventFilterProps {
-  onFilterChange: (filters: FilterState) => void
+  onFiltersChange: (newFilters: Partial<FilterState>) => void
 }
 
 const eventTypes = [
@@ -30,7 +30,7 @@ const targetAudiences = [
   '会計士', '税理士', '経理担当者', '経営者', '学生', 'その他'
 ]
 
-export default function EventFilter({ onFilterChange }: EventFilterProps) {
+export default function EventFilter({ onFiltersChange }: EventFilterProps) {
   const { favorites } = useFavorites()
   const [filters, setFilters] = useState<FilterState>({
     search: '',
@@ -43,8 +43,8 @@ export default function EventFilter({ onFilterChange }: EventFilterProps) {
     favoritesOnly: false,
     categories: [],
     participationFormat: [],
-    datePeriod: [],
-    sortBy: 'date',
+    datePeriod: 'all',
+    sortBy: 'startAt',
     sortOrder: 'asc'
   })
 
@@ -54,8 +54,8 @@ export default function EventFilter({ onFilterChange }: EventFilterProps) {
 
   // フィルター変更時に親コンポーネントに通知
   useEffect(() => {
-    onFilterChange(filters)
-  }, [filters, onFilterChange])
+    onFiltersChange(filters)
+  }, [filters, onFiltersChange])
 
   // ローカルストレージから検索履歴と保存されたフィルターを読み込み
   useEffect(() => {
@@ -119,7 +119,7 @@ export default function EventFilter({ onFilterChange }: EventFilterProps) {
     setFilters({ ...filters, favoritesOnly: checked })
   }
 
-  const handleSortChange = (sortBy: 'date' | 'title' | 'fee' | 'popularity') => {
+  const handleSortChange = (sortBy: 'startAt' | 'title' | 'fee' | 'popularity') => {
     setFilters({ ...filters, sortBy })
   }
 
@@ -139,8 +139,8 @@ export default function EventFilter({ onFilterChange }: EventFilterProps) {
       favoritesOnly: false,
       categories: [],
       participationFormat: [],
-      datePeriod: [],
-      sortBy: 'date',
+      datePeriod: 'all',
+      sortBy: 'startAt',
       sortOrder: 'asc'
     }
     setFilters(newFilters)
@@ -237,10 +237,10 @@ export default function EventFilter({ onFilterChange }: EventFilterProps) {
             <label className="block text-sm text-gray-700 mb-1">並び順</label>
             <select
               value={filters.sortBy}
-              onChange={(e) => handleSortChange(e.target.value as 'date' | 'title' | 'fee' | 'popularity')}
+              onChange={(e) => handleSortChange(e.target.value as 'startAt' | 'title' | 'fee' | 'popularity')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             >
-              <option value="date">開催日時</option>
+              <option value="startAt">開催日時</option>
               <option value="title">タイトル</option>
               <option value="fee">料金</option>
               <option value="popularity">人気度</option>

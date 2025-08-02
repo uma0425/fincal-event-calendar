@@ -15,6 +15,12 @@ type EventType = 'seminar' | 'meetup' | 'workshop' | 'webinar'
 function HomePageContent() {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
+    types: [],
+    prefecture: '',
+    organizer: '',
+    place: '',
+    feeRange: { min: null, max: null },
+    dateRange: { start: '', end: '' },
     favoritesOnly: false,
     categories: [],
     participationFormat: [],
