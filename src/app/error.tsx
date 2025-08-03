@@ -10,7 +10,7 @@ interface ErrorProps {
 
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // エラーをログに記録
+    // エラーをログに記録（本番環境では詳細を表示しない）
     console.error('Application error:', error)
   }, [error])
 
@@ -23,18 +23,6 @@ export default function Error({ error, reset }: ErrorProps) {
           <p className="text-gray-600 mb-4">
             申し訳ございません。予期しないエラーが発生しました。
           </p>
-        </div>
-
-        <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
-          <h2 className="text-sm font-semibold text-gray-700 mb-2">エラー詳細:</h2>
-          <p className="text-sm text-gray-600 font-mono break-all">
-            {error.message || '不明なエラー'}
-          </p>
-          {error.digest && (
-            <p className="text-xs text-gray-500 mt-2">
-              エラーID: {error.digest}
-            </p>
-          )}
         </div>
 
         <div className="space-y-3">
