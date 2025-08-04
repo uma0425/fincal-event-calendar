@@ -15,9 +15,6 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   
-  // ビルド時のタイムアウトを延長
-  staticPageGenerationTimeout: 300,
-  
   // 本番環境での安定性向上
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
