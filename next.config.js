@@ -11,7 +11,7 @@ const nextConfig = {
   // 画像最適化
   images: {
     domains: ['images.unsplash.com'],
-    unoptimized: false,
+    unoptimized: true, // Railwayでの安定性のため
   },
   
   // ビルド設定
