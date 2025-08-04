@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 動的レンダリングを強制
-  output: 'standalone',
-  
   // 実験的機能
   experimental: {
     optimizePackageImports: ['lucide-react'],
