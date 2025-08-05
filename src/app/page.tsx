@@ -15,6 +15,7 @@ interface Event {
   type: EventType
   target?: string
   registerUrl?: string
+  imageUrl?: string
   status: string
   createdAt: string
 }
@@ -141,6 +142,17 @@ export default function HomePage() {
           <div className="space-y-6">
             {events.map((event) => (
               <div key={event.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                {/* イベント画像 */}
+                {event.imageUrl && (
+                  <div className="mb-4">
+                    <img
+                      src={event.imageUrl}
+                      alt={event.title}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+                
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">{event.title}</h3>

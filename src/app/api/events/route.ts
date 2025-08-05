@@ -89,7 +89,6 @@ export async function POST(request: NextRequest) {
         registerUrl: body.registerUrl || null,
         prefecture: body.prefecture || null,
         maxParticipants: body.maxParticipants ? parseInt(body.maxParticipants) : null,
-        location: body.location || null,
         status: EventStatus.pending,
         createdBy: tempUserId
       },

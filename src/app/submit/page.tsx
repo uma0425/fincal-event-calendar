@@ -15,20 +15,37 @@ export default function SubmitPage() {
     fee: '',
     type: 'seminar',
     target: '',
-    registerUrl: ''
+    registerUrl: '',
+    prefecture: '',
+    maxParticipants: '',
+    imageUrl: ''
   })
+
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // フォームデータをAPIに送信
     try {
+      // 画像アップロード処理（簡易版 - 実際はSupabase Storageを使用）
+      let imageUrl = formData.imageUrl
+      if (imageFile) {
+        // 実際の実装ではSupabase Storageにアップロード
+        // ここでは一時的にプレースホルダーURLを使用
+        imageUrl = `https://via.placeholder.com/800x400/2563eb/ffffff?text=${encodeURIComponent(formData.title)}`
+      }
+
+      // フォームデータをAPIに送信
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          imageUrl
+        }),
       })
       
       if (response.ok) {
@@ -36,9 +53,11 @@ export default function SubmitPage() {
         // ホームページにリダイレクト
         window.location.href = '/'
       } else {
-        alert('投稿に失敗しました。')
+        const errorData = await response.json()
+        alert(`投稿に失敗しました: ${errorData.error || '不明なエラー'}`)
       }
     } catch (error) {
+      console.error('投稿エラー:', error)
       alert('エラーが発生しました。')
     }
   }
@@ -48,6 +67,20 @@ export default function SubmitPage() {
       ...formData,
       [e.target.name]: e.target.value
     })
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      
+      // プレビュー表示
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   return (
@@ -91,6 +124,40 @@ export default function SubmitPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="イベントの詳細説明を入力"
             />
+          </div>
+
+          {/* イベント画像 */}
+          <div>
+            <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
+              イベント画像
+            </label>
+            <div className="space-y-4">
+              <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {imagePreview && (
+                <div className="mt-2">
+                  <img
+                    src={imagePreview}
+                    alt="プレビュー"
+                    className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200"
+                  />
+                </div>
+              )}
+              <input
+                type="url"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="または画像URLを直接入力"
+              />
+            </div>
           </div>
 
           {/* 開催日時 */}
@@ -251,6 +318,39 @@ export default function SubmitPage() {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="https://example.com"
+              />
+            </div>
+          </div>
+
+          {/* 都道府県・最大参加者数 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="prefecture" className="block text-sm font-medium text-gray-700 mb-2">
+                都道府県
+              </label>
+              <input
+                type="text"
+                id="prefecture"
+                name="prefecture"
+                value={formData.prefecture}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="例: 東京都"
+              />
+            </div>
+            <div>
+              <label htmlFor="maxParticipants" className="block text-sm font-medium text-gray-700 mb-2">
+                最大参加者数
+              </label>
+              <input
+                type="number"
+                id="maxParticipants"
+                name="maxParticipants"
+                value={formData.maxParticipants}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="制限なし"
+                min="1"
               />
             </div>
           </div>
