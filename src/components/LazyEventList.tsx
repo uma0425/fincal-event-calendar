@@ -13,7 +13,7 @@ interface LazyEventListProps {
 export default function LazyEventList({ 
   events, 
   renderEvent, 
-  itemsPerPage = 10, 
+  itemsPerPage = 12, 
   threshold = 100 
 }: LazyEventListProps) {
   const [visibleItems, setVisibleItems] = useState(itemsPerPage);
@@ -74,27 +74,31 @@ export default function LazyEventList({
   }, [events.length, itemsPerPage]);
 
   return (
-    <div className="space-y-4">
-      {visibleEvents.map((event) => (
-        <div key={event.id} className="animate-fade-in">
-          {renderEvent(event)}
-        </div>
-      ))}
+    <div className="space-y-6">
+      {/* イベントグリッド */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {visibleEvents.map((event) => (
+          <div key={event.id} className="animate-fade-in">
+            {renderEvent(event)}
+          </div>
+        ))}
+      </div>
       
+      {/* 読み込みインジケーター */}
       {hasMore && (
         <div
           ref={loadingRef}
-          className="flex justify-center py-4"
+          className="flex justify-center py-8"
         >
           {isLoading ? (
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-              <span className="text-gray-600">読み込み中...</span>
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <span className="text-gray-600 font-medium">読み込み中...</span>
             </div>
           ) : (
             <button
               onClick={loadMore}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
             >
               さらに読み込む
             </button>
@@ -102,9 +106,15 @@ export default function LazyEventList({
         </div>
       )}
       
+      {/* 完了メッセージ */}
       {!hasMore && events.length > 0 && (
-        <div className="text-center py-4 text-gray-500">
-          すべてのイベントを表示しました
+        <div className="text-center py-8">
+          <div className="inline-flex items-center space-x-2 text-gray-500">
+            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-medium">すべてのイベントを表示しました</span>
+          </div>
         </div>
       )}
     </div>

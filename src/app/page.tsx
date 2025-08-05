@@ -90,22 +90,43 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* ヘッダー */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="mb-4 sm:mb-0">
-              <h1 className="text-3xl font-bold text-gray-900">FinCal</h1>
-              <p className="text-gray-600">フィンランドのイベントカレンダー</p>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* ロゴ */}
+            <div className="flex items-center">
+              <div className="text-blue-600 text-2xl font-bold">FinCal</div>
+              <span className="ml-2 text-gray-600 text-sm">フィンランドのイベントカレンダー</span>
             </div>
-            <div className="flex space-x-4">
+
+            {/* ナビゲーション */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <a href="/" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">
+                ホーム
+              </a>
+              <a href="/calendar" className="text-gray-600 hover:text-blue-600 transition-colors">
+                カレンダー
+              </a>
+              <a href="/favorites" className="text-gray-600 hover:text-blue-600 transition-colors">
+                お気に入り
+              </a>
+            </nav>
+
+            {/* アクションボタン */}
+            <div className="flex items-center space-x-4">
               <button
                 onClick={() => window.location.href = '/submit'}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 イベント投稿
               </button>
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
@@ -113,37 +134,39 @@ export default function Home() {
 
       {/* メインコンテンツ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* フィルター */}
-        <div className="mb-8 space-y-4">
-          {/* 検索バー */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="イベントを検索..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <svg
-              className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+        {/* 検索バー */}
+        <div className="mb-8">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+            <div className="flex items-center space-x-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="イベントを検索..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <button className="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </div>
           </div>
+        </div>
 
-          {/* カテゴリフィルター */}
-          <div className="flex flex-wrap gap-2">
+        {/* カテゴリフィルター */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-3">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                   selectedCategory === category
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 {category === 'all' ? 'すべて' : category}
@@ -152,43 +175,55 @@ export default function Home() {
           </div>
         </div>
 
-        {/* イベントリスト */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              {filteredEvents.length}件のイベント
-            </h2>
-          </div>
-
-          {filteredEvents.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">📅</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">イベントが見つかりません</h3>
-              <p className="text-gray-600">
-                検索条件を変更するか、新しいイベントを投稿してください。
-              </p>
+        {/* イベントセクション */}
+        <div className="space-y-8">
+          {/* 人気のイベント */}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                人気のイベント
+              </h2>
+              <span className="text-gray-500 text-sm">
+                {filteredEvents.length}件のイベント
+              </span>
             </div>
-          ) : (
-            <Suspense fallback={
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-lg shadow-md p-4 animate-pulse">
-                    <div className="h-48 bg-gray-200 rounded-t-lg mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                  </div>
-                ))}
+
+            {filteredEvents.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">📅</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">イベントが見つかりません</h3>
+                <p className="text-gray-600 mb-4">
+                  検索条件を変更するか、新しいイベントを投稿してください。
+                </p>
+                <button
+                  onClick={() => window.location.href = '/submit'}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  イベントを投稿
+                </button>
               </div>
-            }>
-              <LazyEventList
-                events={filteredEvents}
-                renderEvent={renderEvent}
-                itemsPerPage={9}
-                threshold={200}
-              />
-            </Suspense>
-          )}
+            ) : (
+              <Suspense fallback={
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="bg-white rounded-xl shadow-md p-4 animate-pulse">
+                      <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  ))}
+                </div>
+              }>
+                <LazyEventList
+                  events={filteredEvents}
+                  renderEvent={renderEvent}
+                  itemsPerPage={12}
+                  threshold={200}
+                />
+              </Suspense>
+            )}
+          </section>
         </div>
       </main>
     </div>
