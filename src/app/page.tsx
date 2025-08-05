@@ -1,19 +1,20 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { EventType } from '@prisma/client'
 
 interface Event {
   id: string
   title: string
-  description: string
+  description?: string
   startAt: string
   endAt: string
   organizer: string
-  place: string
-  fee: number
-  type: string
-  target: string
-  registerUrl: string
+  place?: string
+  fee?: number
+  type: EventType
+  target?: string
+  registerUrl?: string
   status: string
   createdAt: string
 }
@@ -51,7 +52,7 @@ export default function HomePage() {
     })
   }
 
-  const getEventTypeLabel = (type: string) => {
+  const getEventTypeLabel = (type: EventType) => {
     const typeLabels: { [key: string]: string } = {
       seminar: 'セミナー',
       webinar: 'ウェビナー',
@@ -62,7 +63,7 @@ export default function HomePage() {
     return typeLabels[type] || type
   }
 
-  const getEventTypeColor = (type: string) => {
+  const getEventTypeColor = (type: EventType) => {
     const typeColors: { [key: string]: string } = {
       seminar: 'bg-blue-100 text-blue-800',
       webinar: 'bg-green-100 text-green-800',
@@ -94,15 +95,26 @@ export default function HomePage() {
         <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
           最新のイベント情報をカレンダー形式で確認できます。
         </p>
-        <a
-          href="/submit"
-          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-        >
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          イベントを投稿
-        </a>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="/submit"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            イベントを投稿
+          </a>
+          <a
+            href="/calendar.ics"
+            className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            iCal ダウンロード
+          </a>
+        </div>
       </div>
 
       {/* イベント一覧 */}
@@ -163,7 +175,7 @@ export default function HomePage() {
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                     </svg>
-                    {event.fee === 0 ? '無料' : `¥${event.fee.toLocaleString()}`}
+                    {event.fee === 0 ? '無料' : `¥${event.fee?.toLocaleString()}`}
                   </div>
                 </div>
                 
