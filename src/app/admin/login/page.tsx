@@ -1,0 +1,98 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function AdminLogin() {
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password })
+      })
+
+      if (response.ok) {
+        // ログイン成功
+        router.push('/admin')
+      } else {
+        const data = await response.json()
+        setError(data.error || 'ログインに失敗しました')
+      }
+    } catch (err) {
+      setError('ログインに失敗しました')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <div className="text-3xl font-bold text-blue-600 mb-2">FinCal</div>
+          <h2 className="text-2xl font-semibold text-gray-900">管理者ログイン</h2>
+          <p className="text-gray-600 mt-2">管理者パスワードを入力してください</p>
+        </div>
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="password" className="sr-only">
+              パスワード
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="管理者パスワード"
+            />
+          </div>
+
+          {error && (
+            <div className="text-red-600 text-sm text-center">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ログイン中...
+                </div>
+              ) : (
+                'ログイン'
+              )}
+            </button>
+          </div>
+        </form>
+
+        <div className="text-center">
+          <a href="/" className="text-blue-600 hover:text-blue-500 text-sm">
+            ホームに戻る
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+} 

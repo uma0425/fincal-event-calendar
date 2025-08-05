@@ -88,6 +88,22 @@ export default function AdminDashboard() {
     }
   }
 
+  // ログアウト
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/admin/logout', {
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        // ログアウト成功
+        window.location.href = '/admin/login'
+      }
+    } catch (err) {
+      console.error('ログアウトエラー:', err)
+    }
+  }
+
   // 日付のフォーマット
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('ja-JP', {
@@ -147,6 +163,12 @@ export default function AdminDashboard() {
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 更新
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                ログアウト
               </button>
             </div>
           </div>

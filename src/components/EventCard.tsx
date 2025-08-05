@@ -2,6 +2,7 @@
 
 import { memo, useMemo } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Event } from '@prisma/client';
 
 interface EventCardProps {
@@ -10,6 +11,8 @@ interface EventCardProps {
 }
 
 const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
+  const router = useRouter();
+
   // 日付フォーマットをメモ化
   const formattedDate = useMemo(() => {
     const date = new Date(event.startAt);
@@ -52,10 +55,20 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
     return labels[event.type] || 'その他';
   }, [event.type]);
 
+  // カードクリック時の処理
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      // デフォルトの動作：詳細ページに遷移
+      router.push(`/events/${event.id}`);
+    }
+  };
+
   return (
     <div
       className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
-      onClick={onClick}
+      onClick={handleCardClick}
     >
       {/* 画像セクション */}
       <div className="relative">
