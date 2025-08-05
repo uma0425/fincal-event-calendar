@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { EventStatus } from '@prisma/client'
+import { EventStatus, EventType } from '@prisma/client'
 
 // 管理者用：イベントステータス更新
 export async function PATCH(
