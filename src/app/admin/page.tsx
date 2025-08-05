@@ -104,6 +104,36 @@ export default function AdminDashboard() {
     }
   }
 
+  // イベントの削除
+  const deleteEvent = async (eventId: string) => {
+    if (!confirm('このイベントを削除しますか？この操作は取り消せません。')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/events/${eventId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        // 成功したらイベントリストを更新
+        fetchEvents()
+        alert('イベントを削除しました')
+      } else {
+        const errorData = await response.json()
+        alert(`削除に失敗しました: ${errorData.error}`)
+      }
+    } catch (err) {
+      console.error('削除エラー:', err)
+      alert('削除に失敗しました')
+    }
+  }
+
+  // イベントの編集ページに遷移
+  const editEvent = (eventId: string) => {
+    window.location.href = `/admin/events/${eventId}/edit`
+  }
+
   // 日付のフォーマット
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('ja-JP', {
@@ -263,6 +293,18 @@ export default function AdminDashboard() {
                       >
                         拒否
                       </button>
+                      <button
+                        onClick={() => editEvent(event.id)}
+                        className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                      >
+                        編集
+                      </button>
+                      <button
+                        onClick={() => deleteEvent(event.id)}
+                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                      >
+                        削除
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -304,6 +346,20 @@ export default function AdminDashboard() {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         公開済み
                       </span>
+                    </div>
+                    <div className="flex items-center space-x-2 ml-4">
+                      <button
+                        onClick={() => editEvent(event.id)}
+                        className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                      >
+                        編集
+                      </button>
+                      <button
+                        onClick={() => deleteEvent(event.id)}
+                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                      >
+                        削除
+                      </button>
                     </div>
                   </div>
                 </div>

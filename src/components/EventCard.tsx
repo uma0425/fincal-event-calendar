@@ -25,9 +25,11 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
   // 時間フォーマットをメモ化
   const formattedTime = useMemo(() => {
     const date = new Date(event.startAt);
+    // 日本時間で表示
     return date.toLocaleTimeString('ja-JP', {
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: 'Asia/Tokyo'
     });
   }, [event.startAt]);
 

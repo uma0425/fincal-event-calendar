@@ -93,40 +93,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 日付の検証
-    const startDate = new Date(body.startDate + (body.startTime ? `T${body.startTime}:00` : 'T00:00:00'))
-    const endDate = new Date(body.endDate || body.startDate + (body.endTime ? `T${body.endTime}:00` : 'T23:59:59'))
-    
-    if (isNaN(startDate.getTime())) {
-      return NextResponse.json(
-        { success: false, error: '開始日の形式が正しくありません' },
-        { status: 400 }
-      )
-    }
+    // 日時を結合してISO文字列に変換（日本時間）
+    const startDateTime = new Date(`${body.startDate}T${body.startTime}:00+09:00`)
+    const endDateTime = new Date(`${body.endDate}T${body.endTime}:00+09:00`)
 
-    if (isNaN(endDate.getTime())) {
-      return NextResponse.json(
-        { success: false, error: '終了日の形式が正しくありません' },
-        { status: 400 }
-      )
-    }
-
-    // 新しいイベントを作成（createdByフィールドを除外）
+    // イベントデータを作成
     const eventData = {
       title: body.title,
       description: body.description,
-      startAt: startDate,
-      endAt: endDate,
+      startAt: startDateTime,
+      endAt: endDateTime,
+      type: (body.type as EventType) || EventType.other,
       organizer: body.organizer,
       place: body.place || null,
-      fee: body.fee ? parseInt(body.fee) : 0,
-      type: (body.type as EventType) || EventType.other,
-      target: body.target || null,
       registerUrl: body.registerUrl || null,
-      prefecture: body.prefecture || null,
-      maxParticipants: body.maxParticipants ? parseInt(body.maxParticipants) : null,
-      status: EventStatus.pending,
+      fee: parseInt(body.fee) || 0,
+      target: body.target || null,
       imageUrl: body.imageUrl || null,
+      prefecture: body.prefecture || null,
+      status: EventStatus.pending,
+      maxParticipants: body.maxParticipants ? parseInt(body.maxParticipants) : null,
       location: body.place || null
     }
 

@@ -62,7 +62,7 @@ export default function SubmitPage() {
         },
         body: JSON.stringify({
           ...formData,
-          imageUrl
+          imageUrl: imageUrl || null // nullの場合はnullを送信
         }),
       })
       
