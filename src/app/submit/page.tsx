@@ -23,11 +23,29 @@ export default function SubmitPage() {
 
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string>('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
     
     try {
+      // バリデーション
+      if (!formData.title.trim()) {
+        throw new Error('イベントタイトルは必須です')
+      }
+      if (!formData.description.trim()) {
+        throw new Error('イベント説明は必須です')
+      }
+      if (!formData.startDate) {
+        throw new Error('開始日は必須です')
+      }
+      if (!formData.organizer.trim()) {
+        throw new Error('主催者は必須です')
+      }
+
       // 画像アップロード処理（簡易版 - 実際はSupabase Storageを使用）
       let imageUrl = formData.imageUrl
       if (imageFile) {
@@ -48,17 +66,21 @@ export default function SubmitPage() {
         }),
       })
       
-      if (response.ok) {
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
         alert('イベントが投稿されました！')
         // ホームページにリダイレクト
         window.location.href = '/'
       } else {
-        const errorData = await response.json()
-        alert(`投稿に失敗しました: ${errorData.error || '不明なエラー'}`)
+        throw new Error(result.error || '投稿に失敗しました')
       }
     } catch (error) {
       console.error('投稿エラー:', error)
-      alert('エラーが発生しました。')
+      const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
+      setError(errorMessage)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -89,6 +111,25 @@ export default function SubmitPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">イベント投稿</h1>
         <p className="text-gray-600">新しいイベントを投稿してください</p>
       </div>
+
+      {/* エラーメッセージ */}
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">エラーが発生しました</h3>
+              <div className="mt-2 text-sm text-red-700">
+                {error}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow-md p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -361,14 +402,16 @@ export default function SubmitPage() {
               type="button"
               onClick={() => window.location.href = '/'}
               className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
             >
               キャンセル
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting}
             >
-              イベントを投稿
+              {isSubmitting ? '投稿中...' : 'イベントを投稿'}
             </button>
           </div>
         </form>

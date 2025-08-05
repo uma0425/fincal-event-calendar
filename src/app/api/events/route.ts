@@ -34,14 +34,6 @@ export async function GET(request: NextRequest) {
       where,
       orderBy: {
         startAt: 'asc'
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true
-          }
-        }
       }
     })
 
@@ -63,6 +55,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
+    console.log('受信したデータ:', body)
+    
     // 必須フィールドの検証
     if (!body.title || !body.description || !body.startDate || !body.organizer) {
       return NextResponse.json(
@@ -71,36 +65,49 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 一時的なユーザーID（後で認証システムと連携）
-    const tempUserId = 'temp-user-id'
+    // 日付の検証
+    const startDate = new Date(body.startDate + (body.startTime ? `T${body.startTime}:00` : 'T00:00:00'))
+    const endDate = new Date(body.endDate || body.startDate + (body.endTime ? `T${body.endTime}:00` : 'T23:59:59'))
+    
+    if (isNaN(startDate.getTime())) {
+      return NextResponse.json(
+        { success: false, error: '開始日の形式が正しくありません' },
+        { status: 400 }
+      )
+    }
 
-    // 新しいイベントを作成
+    if (isNaN(endDate.getTime())) {
+      return NextResponse.json(
+        { success: false, error: '終了日の形式が正しくありません' },
+        { status: 400 }
+      )
+    }
+
+    // 新しいイベントを作成（createdByフィールドを一時的に除外）
+    const eventData = {
+      title: body.title,
+      description: body.description,
+      startAt: startDate,
+      endAt: endDate,
+      organizer: body.organizer,
+      place: body.place || null,
+      fee: body.fee ? parseInt(body.fee) : 0,
+      type: body.type || 'other',
+      target: body.target || null,
+      registerUrl: body.registerUrl || null,
+      prefecture: body.prefecture || null,
+      maxParticipants: body.maxParticipants ? parseInt(body.maxParticipants) : null,
+      status: EventStatus.pending,
+      imageUrl: body.imageUrl || null
+    }
+
+    console.log('作成するイベントデータ:', eventData)
+
     const newEvent = await prisma.event.create({
-      data: {
-        title: body.title,
-        description: body.description,
-        startAt: new Date(body.startDate + (body.startTime ? `T${body.startTime}:00` : 'T00:00:00')),
-        endAt: new Date(body.endDate + (body.endTime ? `T${body.endTime}:00` : 'T23:59:59')),
-        organizer: body.organizer,
-        place: body.place || null,
-        fee: body.fee ? parseInt(body.fee) : 0,
-        type: body.type || 'other',
-        target: body.target || null,
-        registerUrl: body.registerUrl || null,
-        prefecture: body.prefecture || null,
-        maxParticipants: body.maxParticipants ? parseInt(body.maxParticipants) : null,
-        status: EventStatus.pending,
-        createdBy: tempUserId
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true
-          }
-        }
-      }
+      data: eventData
     })
+
+    console.log('作成されたイベント:', newEvent)
 
     return NextResponse.json({
       success: true,
@@ -108,8 +115,22 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('イベント投稿エラー:', error)
+    
+    // より詳細なエラーメッセージを提供
+    let errorMessage = 'イベントの投稿に失敗しました'
+    
+    if (error instanceof Error) {
+      if (error.message.includes('foreign key constraint')) {
+        errorMessage = 'データベース接続エラーが発生しました'
+      } else if (error.message.includes('invalid input syntax')) {
+        errorMessage = '入力データの形式が正しくありません'
+      } else {
+        errorMessage = error.message
+      }
+    }
+    
     return NextResponse.json(
-      { success: false, error: 'イベントの投稿に失敗しました' },
+      { success: false, error: errorMessage },
       { status: 500 }
     )
   }

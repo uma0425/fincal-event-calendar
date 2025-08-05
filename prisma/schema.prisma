@@ -58,14 +58,14 @@ model Event {
   imageUrl      String?
   prefecture    String?
   status        EventStatus @default(pending)
-  createdBy     String
+  createdBy     String?     // オプショナルに変更
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   maxParticipants Int?
   location      String?
 
-  // Relations
-  user User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  // Relations（オプショナル）
+  user User? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@map("events")
 } 
