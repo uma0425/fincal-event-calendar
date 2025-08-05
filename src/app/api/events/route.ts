@@ -5,6 +5,15 @@ import { EventStatus } from '@prisma/client'
 // イベント一覧取得（公開済みのみ）
 export async function GET(request: NextRequest) {
   try {
+    // データベース接続チェック
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL環境変数が設定されていません')
+      return NextResponse.json(
+        { success: false, error: 'データベース接続が設定されていません' },
+        { status: 500 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type')
     const prefecture = searchParams.get('prefecture')
@@ -43,8 +52,20 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('イベント取得エラー:', error)
+    
+    let errorMessage = 'イベントの取得に失敗しました'
+    if (error instanceof Error) {
+      if (error.message.includes('DATABASE_URL')) {
+        errorMessage = 'データベース接続が設定されていません'
+      } else if (error.message.includes('connection')) {
+        errorMessage = 'データベース接続エラーが発生しました'
+      } else {
+        errorMessage = error.message
+      }
+    }
+    
     return NextResponse.json(
-      { success: false, error: 'イベントの取得に失敗しました' },
+      { success: false, error: errorMessage },
       { status: 500 }
     )
   }
@@ -53,6 +74,15 @@ export async function GET(request: NextRequest) {
 // イベント投稿
 export async function POST(request: NextRequest) {
   try {
+    // データベース接続チェック
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL環境変数が設定されていません')
+      return NextResponse.json(
+        { success: false, error: 'データベース接続が設定されていません。管理者にお問い合わせください。' },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     
     console.log('受信したデータ:', body)
@@ -120,10 +150,14 @@ export async function POST(request: NextRequest) {
     let errorMessage = 'イベントの投稿に失敗しました'
     
     if (error instanceof Error) {
-      if (error.message.includes('foreign key constraint')) {
+      if (error.message.includes('DATABASE_URL')) {
+        errorMessage = 'データベース接続が設定されていません。管理者にお問い合わせください。'
+      } else if (error.message.includes('foreign key constraint')) {
         errorMessage = 'データベース接続エラーが発生しました'
       } else if (error.message.includes('invalid input syntax')) {
         errorMessage = '入力データの形式が正しくありません'
+      } else if (error.message.includes('connection')) {
+        errorMessage = 'データベース接続エラーが発生しました。しばらく時間をおいてから再試行してください。'
       } else {
         errorMessage = error.message
       }
