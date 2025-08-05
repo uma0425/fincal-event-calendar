@@ -6,11 +6,10 @@ import { EventStatus } from '@prisma/client'
 export async function GET(request: NextRequest) {
   try {
     // データベース接続チェック
-    if (!process.env.DATABASE_URL) {
-      console.error('DATABASE_URL環境変数が設定されていません')
+    if (!prisma) {
       return NextResponse.json(
         { success: false, error: 'データベース接続が設定されていません' },
-        { status: 500 }
+        { status: 503 }
       )
     }
 
@@ -75,11 +74,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // データベース接続チェック
-    if (!process.env.DATABASE_URL) {
-      console.error('DATABASE_URL環境変数が設定されていません')
+    if (!prisma) {
       return NextResponse.json(
         { success: false, error: 'データベース接続が設定されていません。管理者にお問い合わせください。' },
-        { status: 500 }
+        { status: 503 }
       )
     }
 
