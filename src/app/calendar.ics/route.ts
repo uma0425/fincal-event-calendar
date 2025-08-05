@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createEvent } from 'ics'
+import { EventStatus } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     const prefecture = searchParams.get('prefecture')
 
     const where: any = {
-      status: 'published'
+      status: EventStatus.published
     }
 
     if (type) {
