@@ -1,8 +1,19 @@
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
+import { initializeDatabase } from '@/lib/init-db'
 
-export const metadata = {
-  title: 'FinCal - イベントカレンダー',
-  description: 'イベントの検索、投稿、管理ができる総合イベントカレンダーサービス。',
+const inter = Inter({ subsets: ['latin'] })
+
+export const metadata: Metadata = {
+  title: 'FinCal - フィンランドのイベントカレンダー',
+  description: 'フィンランドの最新イベント情報をお届けします',
+}
+
+// データベース初期化を実行（サーバーサイドでのみ実行）
+if (typeof window === 'undefined') {
+  // サーバーサイドでのみ実行
+  initializeDatabase().catch(console.error)
 }
 
 export default function RootLayout({
@@ -12,13 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body>
-        <div className="min-h-screen bg-gray-50">
-          <main className="container mx-auto px-4 py-8">
-            {children}
-          </main>
-        </div>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   )
 } 
