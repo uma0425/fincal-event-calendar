@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, EventType, EventStatus } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -9,7 +9,7 @@ const sampleEvents = [
     description: '最新のFinTechトレンドについて学ぶセミナーです。AI、ブロックチェーン、デジタルバンキングなど、金融業界の最新技術について詳しく解説します。',
     startAt: new Date('2024-12-15T10:00:00Z'),
     endAt: new Date('2024-12-15T12:00:00Z'),
-    type: 'seminar',
+    type: EventType.seminar,
     organizer: 'FinTech協会',
     place: '東京国際フォーラム',
     registerUrl: 'https://example.com/fintech-seminar',
@@ -17,7 +17,7 @@ const sampleEvents = [
     target: 'FinTech関係者、金融業界従事者',
     imageUrl: null,
     prefecture: '東京都',
-    status: 'published',
+    status: EventStatus.published,
     maxParticipants: 100,
     location: '東京国際フォーラム'
   },
@@ -26,7 +26,7 @@ const sampleEvents = [
     description: 'ブロックチェーン技術の基礎から応用まで実践的に学べます。ハンズオン形式で、実際にスマートコントラクトを作成します。',
     startAt: new Date('2024-12-20T14:00:00Z'),
     endAt: new Date('2024-12-20T17:00:00Z'),
-    type: 'workshop',
+    type: EventType.workshop,
     organizer: 'ブロックチェーン研究所',
     place: '大阪ビジネスパーク',
     registerUrl: 'https://example.com/blockchain-workshop',
@@ -34,7 +34,7 @@ const sampleEvents = [
     target: '開発者、エンジニア',
     imageUrl: null,
     prefecture: '大阪府',
-    status: 'published',
+    status: EventStatus.published,
     maxParticipants: 30,
     location: '大阪ビジネスパーク'
   },
@@ -43,7 +43,7 @@ const sampleEvents = [
     description: 'AI・機械学習に興味のある方々が集まるミートアップです。最新の研究動向や実務での活用事例について情報交換を行います。',
     startAt: new Date('2024-12-25T19:00:00Z'),
     endAt: new Date('2024-12-25T21:00:00Z'),
-    type: 'meetup',
+    type: EventType.meetup,
     organizer: 'AIコミュニティ',
     place: '渋谷スクランブルスクエア',
     registerUrl: 'https://example.com/ai-meetup',
@@ -51,7 +51,7 @@ const sampleEvents = [
     target: 'AI研究者、データサイエンティスト',
     imageUrl: null,
     prefecture: '東京都',
-    status: 'published',
+    status: EventStatus.published,
     maxParticipants: 50,
     location: '渋谷スクランブルスクエア'
   },
@@ -60,7 +60,7 @@ const sampleEvents = [
     description: '企業のデジタル変革について、成功事例と失敗事例を交えて詳しく解説します。オンラインで参加可能です。',
     startAt: new Date('2024-12-30T15:00:00Z'),
     endAt: new Date('2024-12-30T16:30:00Z'),
-    type: 'webinar',
+    type: EventType.webinar,
     organizer: 'デジタル変革コンサルティング',
     place: 'オンライン',
     registerUrl: 'https://example.com/dx-webinar',
@@ -68,7 +68,7 @@ const sampleEvents = [
     target: '経営者、IT担当者',
     imageUrl: null,
     prefecture: null,
-    status: 'published',
+    status: EventStatus.published,
     maxParticipants: 200,
     location: 'オンライン'
   },
@@ -77,7 +77,7 @@ const sampleEvents = [
     description: '注目のスタートアップが最新のサービスやプロダクトをピッチします。投資家やメディアも参加予定です。',
     startAt: new Date('2025-01-05T18:00:00Z'),
     endAt: new Date('2025-01-05T20:00:00Z'),
-    type: 'seminar',
+    type: EventType.seminar,
     organizer: 'スタートアップ支援団体',
     place: '六本木ヒルズ',
     registerUrl: 'https://example.com/startup-pitch',
@@ -85,7 +85,7 @@ const sampleEvents = [
     target: '起業家、投資家、メディア',
     imageUrl: null,
     prefecture: '東京都',
-    status: 'published',
+    status: EventStatus.published,
     maxParticipants: 80,
     location: '六本木ヒルズ'
   }

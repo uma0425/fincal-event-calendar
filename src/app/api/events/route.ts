@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { EventStatus } from '@prisma/client'
+import { EventStatus, EventType } from '@prisma/client'
 
 // イベント一覧取得（公開済みのみ）
 export async function GET(request: NextRequest) {
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 新しいイベントを作成（createdByフィールドを一時的に除外）
+    // 新しいイベントを作成（createdByフィールドを除外）
     const eventData = {
       title: body.title,
       description: body.description,
@@ -120,13 +120,14 @@ export async function POST(request: NextRequest) {
       organizer: body.organizer,
       place: body.place || null,
       fee: body.fee ? parseInt(body.fee) : 0,
-      type: body.type || 'other',
+      type: (body.type as EventType) || EventType.other,
       target: body.target || null,
       registerUrl: body.registerUrl || null,
       prefecture: body.prefecture || null,
       maxParticipants: body.maxParticipants ? parseInt(body.maxParticipants) : null,
       status: EventStatus.pending,
-      imageUrl: body.imageUrl || null
+      imageUrl: body.imageUrl || null,
+      location: body.place || null
     }
 
     console.log('作成するイベントデータ:', eventData)
