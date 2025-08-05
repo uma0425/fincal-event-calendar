@@ -14,7 +14,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:init": "node scripts/init-db.js",
+    "db:test": "node -e \"require('@prisma/client').PrismaClient.prototype.\$connect().then(() => console.log('✅ DB接続成功')).catch(e => console.error('❌ DB接続失敗:', e.message)).finally(() => process.exit())\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
