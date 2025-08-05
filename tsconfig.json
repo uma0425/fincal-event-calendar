@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "es2015",
     "lib": ["dom", "dom.iterable", "es6"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -15,6 +16,7 @@
     "noImplicitAny": false,
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": false,
+    "downlevelIteration": true,
     "plugins": [
       {
         "name": "next"
