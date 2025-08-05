@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// 管理者認証用のシンプルなパスワード
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // 管理者ページへのアクセスをチェック
-  if (pathname.startsWith('/admin')) {
+  // 管理者ページへのアクセスをチェック（ログインページは除外）
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     // セッションまたはクッキーで認証状態をチェック
     const isAuthenticated = request.cookies.get('admin-auth')?.value === 'true'
     

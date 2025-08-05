@@ -23,10 +23,11 @@ export async function POST(request: NextRequest) {
 
       // 認証クッキーを設定（24時間有効）
       response.cookies.set('admin-auth', 'true', {
-        httpOnly: true,
+        httpOnly: false, // クライアントサイドでもアクセス可能にする
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 24 * 60 * 60 // 24時間
+        maxAge: 24 * 60 * 60, // 24時間
+        path: '/'
       })
 
       return response

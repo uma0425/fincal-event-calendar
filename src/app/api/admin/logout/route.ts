@@ -9,10 +9,11 @@ export async function POST(request: NextRequest) {
 
     // 認証クッキーを削除
     response.cookies.set('admin-auth', '', {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 0
+      maxAge: 0,
+      path: '/'
     })
 
     return response

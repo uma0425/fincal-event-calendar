@@ -24,8 +24,10 @@ export default function AdminLogin() {
       })
 
       if (response.ok) {
-        // ログイン成功
-        router.push('/admin')
+        // ログイン成功 - 少し待ってからリダイレクト
+        setTimeout(() => {
+          router.push('/admin')
+        }, 100)
       } else {
         const data = await response.json()
         setError(data.error || 'ログインに失敗しました')
