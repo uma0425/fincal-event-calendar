@@ -116,6 +116,9 @@ export async function POST(request: NextRequest) {
       location: body.place || null
     }
 
+    console.log('受信した画像URL:', body.imageUrl)
+    console.log('保存する画像URL:', eventData.imageUrl)
+
     console.log('作成するイベントデータ:', eventData)
 
     const newEvent = await prisma.event.create({

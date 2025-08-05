@@ -52,7 +52,12 @@ export default function SubmitPage() {
         // 実際の実装ではSupabase Storageにアップロード
         // ここでは一時的にプレースホルダーURLを使用
         imageUrl = `https://via.placeholder.com/800x400/2563eb/ffffff?text=${encodeURIComponent(formData.title)}`
+      } else if (imagePreview) {
+        // プレビューがある場合は、そのURLを使用
+        imageUrl = imagePreview
       }
+
+      console.log('送信する画像URL:', imageUrl)
 
       // フォームデータをAPIに送信
       const response = await fetch('/api/events', {
@@ -394,6 +399,25 @@ export default function SubmitPage() {
                 min="1"
               />
             </div>
+          </div>
+
+          {/* 画像URL */}
+          <div>
+            <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-2">
+              画像URL
+            </label>
+            <input
+              type="url"
+              id="imageUrl"
+              name="imageUrl"
+              value={formData.imageUrl}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://example.com/image.jpg"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              画像のURLを直接入力するか、下のファイルアップロードを使用してください
+            </p>
           </div>
 
           {/* 送信ボタン */}
