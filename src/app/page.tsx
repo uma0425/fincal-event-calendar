@@ -142,6 +142,7 @@ export default function Home() {
                 <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">イベント</a>
                 <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">カレンダー</a>
                 <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">お気に入り</a>
+                <a href="/admin" className="text-gray-700 hover:text-blue-600 transition-colors">管理者</a>
               </nav>
             </div>
             <div className="flex items-center space-x-4">

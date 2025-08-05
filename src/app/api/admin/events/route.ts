@@ -2,14 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { EventStatus } from '@prisma/client'
 
-// 管理者用：全イベント取得（承認待ち含む）
+// 管理者用イベント一覧取得
 export async function GET(request: NextRequest) {
   try {
+    // データベース接続チェック
+    if (!prisma) {
+      return NextResponse.json(
+        { success: false, error: 'データベース接続が設定されていません' },
+        { status: 503 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
 
     const where: any = {}
-    if (status) {
+
+    // ステータスフィルター
+    if (status && status !== 'all') {
       where.status = status as EventStatus
     }
 
@@ -17,14 +27,6 @@ export async function GET(request: NextRequest) {
       where,
       orderBy: {
         createdAt: 'desc'
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true
-          }
-        }
       }
     })
 
@@ -34,8 +36,20 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('管理者イベント取得エラー:', error)
+    
+    let errorMessage = 'イベントの取得に失敗しました'
+    if (error instanceof Error) {
+      if (error.message.includes('DATABASE_URL')) {
+        errorMessage = 'データベース接続が設定されていません'
+      } else if (error.message.includes('connection')) {
+        errorMessage = 'データベース接続エラーが発生しました'
+      } else {
+        errorMessage = error.message
+      }
+    }
+    
     return NextResponse.json(
-      { success: false, error: 'イベントの取得に失敗しました' },
+      { success: false, error: errorMessage },
       { status: 500 }
     )
   }
