@@ -10,36 +10,40 @@ export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // カテゴリリストをメモ化
-  const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(events.map(event => event.type)));
-    return ['all', ...uniqueCategories];
-  }, [events]);
-
-  // フィルタリングされたイベントをメモ化
-  const filteredEvents = useMemo(() => {
-    return events.filter(event => {
-      const matchesCategory = selectedCategory === 'all' || event.type === selectedCategory;
-      const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase()));
-      return matchesCategory && matchesSearch;
-    });
-  }, [events, selectedCategory, searchTerm]);
+  const [selectedType, setSelectedType] = useState<string>('');
+  const [selectedPrefecture, setSelectedPrefecture] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // イベントデータを取得
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const data = await getCachedEvents();
-        setEvents(data);
         setError(null);
+        
+        const response = await fetch('/api/events');
+        
+        if (!response.ok) {
+          if (response.status === 503) {
+            // データベース接続エラーの場合、空の配列を設定
+            setEvents([]);
+            setError('データベース接続が設定されていません。サンプルデータを表示しています。');
+          } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+        } else {
+          const data = await response.json();
+          if (data.success) {
+            setEvents(data.data || []);
+          } else {
+            setEvents([]);
+            setError(data.error || 'イベントの取得に失敗しました');
+          }
+        }
       } catch (err) {
+        console.error('イベント取得エラー:', err);
+        setEvents([]);
         setError('イベントの取得に失敗しました');
-        console.error('Error fetching events:', err);
       } finally {
         setLoading(false);
       }
@@ -48,182 +52,229 @@ export default function Home() {
     fetchEvents();
   }, []);
 
-  // イベントカードのレンダリング関数
-  const renderEvent = (event: Event) => (
-    <EventCard
-      key={event.id}
-      event={event}
-      onClick={() => {
-        // イベント詳細ページへの遷移
-        window.location.href = `/events/${event.id}`;
-      }}
-    />
-  );
+  // カテゴリ（イベントタイプ）を取得
+  const categories = useMemo(() => {
+    if (!events || events.length === 0) return [];
+    const types = [...new Set(events.map(event => event.type))];
+    return types.map(type => ({
+      value: type,
+      label: type === 'seminar' ? 'セミナー' :
+             type === 'webinar' ? 'ウェビナー' :
+             type === 'meetup' ? 'ミートアップ' :
+             type === 'workshop' ? 'ワークショップ' : 'その他'
+    }));
+  }, [events]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">イベントを読み込み中...</p>
-        </div>
-      </div>
-    );
-  }
+  // フィルタリングされたイベント
+  const filteredEvents = useMemo(() => {
+    if (!events || events.length === 0) return [];
+    
+    return events.filter(event => {
+      const matchesType = !selectedType || event.type === selectedType;
+      const matchesPrefecture = !selectedPrefecture || event.prefecture === selectedPrefecture;
+      const matchesSearch = !searchQuery || 
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        event.organizer.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return matchesType && matchesPrefecture && matchesSearch;
+    });
+  }, [events, selectedType, selectedPrefecture, searchQuery]);
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">エラーが発生しました</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            再試行
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // サンプルデータ（データベース接続エラー時用）
+  const sampleEvents: Event[] = [
+    {
+      id: 'sample-1',
+      title: 'FinTech セミナー 2024',
+      description: '最新のFinTechトレンドについて学ぶセミナーです。',
+      startAt: new Date('2024-12-15T10:00:00Z'),
+      endAt: new Date('2024-12-15T12:00:00Z'),
+      type: 'seminar',
+      organizer: 'FinTech協会',
+      place: '東京国際フォーラム',
+      registerUrl: null,
+      fee: 0,
+      target: 'FinTech関係者',
+      imageUrl: null,
+      prefecture: '東京都',
+      status: 'published',
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      maxParticipants: 100,
+      location: '東京国際フォーラム'
+    },
+    {
+      id: 'sample-2',
+      title: 'ブロックチェーン技術ワークショップ',
+      description: 'ブロックチェーン技術の基礎から応用まで実践的に学べます。',
+      startAt: new Date('2024-12-20T14:00:00Z'),
+      endAt: new Date('2024-12-20T17:00:00Z'),
+      type: 'workshop',
+      organizer: 'ブロックチェーン研究所',
+      place: '大阪ビジネスパーク',
+      registerUrl: null,
+      fee: 5000,
+      target: '開発者',
+      imageUrl: null,
+      prefecture: '大阪府',
+      status: 'published',
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      maxParticipants: 30,
+      location: '大阪ビジネスパーク'
+    }
+  ];
+
+  // 表示するイベント（エラー時はサンプルデータ）
+  const displayEvents = error && events.length === 0 ? sampleEvents : filteredEvents;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* ヘッダー */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            {/* ロゴ */}
-            <div className="flex items-center">
-              <div className="text-blue-600 text-2xl font-bold">FinCal</div>
-              <span className="ml-2 text-gray-600 text-sm">フィンランドのイベントカレンダー</span>
-            </div>
-
-            {/* ナビゲーション */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="/" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">
-                ホーム
-              </a>
-              <a href="/calendar" className="text-gray-600 hover:text-blue-600 transition-colors">
-                カレンダー
-              </a>
-              <a href="/favorites" className="text-gray-600 hover:text-blue-600 transition-colors">
-                お気に入り
-              </a>
-            </nav>
-
-            {/* アクションボタン */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => window.location.href = '/submit'}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                イベント投稿
-              </button>
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              <div className="text-2xl font-bold text-blue-600">FinCal</div>
+              <nav className="hidden md:flex space-x-8">
+                <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">イベント</a>
+                <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">カレンダー</a>
+                <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">お気に入り</a>
+              </nav>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button className="text-gray-700 hover:text-blue-600 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5z" />
                 </svg>
-              </div>
+              </button>
+              <a href="/submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                イベント投稿
+              </a>
             </div>
           </div>
         </div>
       </header>
 
-      {/* メインコンテンツ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* エラーメッセージ */}
+        {error && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-800">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 検索バー */}
         <div className="mb-8">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center space-x-4">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="イベントを検索..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <button className="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
+          <div className="relative max-w-2xl mx-auto">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </div>
+            <input
+              type="text"
+              placeholder="イベントを検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
           </div>
         </div>
 
         {/* カテゴリフィルター */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-3">
-            {categories.map((category) => (
+        {categories.length > 0 && (
+          <div className="mb-8">
+            <div className="flex flex-wrap gap-3 justify-center">
               <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                onClick={() => setSelectedType('')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  selectedType === '' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                 }`}
               >
-                {category === 'all' ? 'すべて' : category}
+                すべて
               </button>
-            ))}
+              {categories.map((category) => (
+                <button
+                  key={category.value}
+                  onClick={() => setSelectedType(category.value)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    selectedType === category.value 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* イベントセクション */}
+        {/* イベントリスト */}
         <div className="space-y-8">
           {/* 人気のイベント */}
           <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                人気のイベント
-              </h2>
-              <span className="text-gray-500 text-sm">
-                {filteredEvents.length}件のイベント
-              </span>
-            </div>
-
-            {filteredEvents.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">📅</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">イベントが見つかりません</h3>
-                <p className="text-gray-600 mb-4">
-                  検索条件を変更するか、新しいイベントを投稿してください。
-                </p>
-                <button
-                  onClick={() => window.location.href = '/submit'}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  イベントを投稿
-                </button>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">人気のイベント</h2>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                  </div>
+                ))}
+              </div>
+            ) : displayEvents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayEvents.slice(0, 6).map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
               </div>
             ) : (
+              <div className="text-center py-12">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">イベントが見つかりません</h3>
+                <p className="mt-1 text-sm text-gray-500">検索条件を変更するか、新しいイベントを投稿してください。</p>
+              </div>
+            )}
+          </section>
+
+          {/* すべてのイベント */}
+          {displayEvents.length > 6 && (
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">すべてのイベント</h2>
               <Suspense fallback={
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="bg-white rounded-xl shadow-md p-4 animate-pulse">
-                      <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+                      <div className="h-4 bg-gray-200 rounded mb-4"></div>
                       <div className="h-3 bg-gray-200 rounded mb-2"></div>
                       <div className="h-3 bg-gray-200 rounded w-2/3"></div>
                     </div>
                   ))}
                 </div>
               }>
-                <LazyEventList
-                  events={filteredEvents}
-                  renderEvent={renderEvent}
-                  itemsPerPage={12}
-                  threshold={200}
-                />
+                <LazyEventList events={displayEvents.slice(6)} />
               </Suspense>
-            )}
-          </section>
+            </section>
+          )}
         </div>
       </main>
     </div>
