@@ -1,4 +1,4 @@
-import { createEvent, createCalendar } from 'ics'
+import { createEvent } from 'ics'
 import { Event } from '@prisma/client'
 
 export async function generateICS(events: Event[]): Promise<string> {
@@ -33,20 +33,34 @@ export async function generateICS(events: Event[]): Promise<string> {
     })
   })
 
-  const calendar = createCalendar({
-    name: 'FinCal - 会計・ファイナンスイベント',
-    description: '会計・ファイナンス系イベントのカレンダー',
-    timezone: 'Asia/Tokyo',
-    events: icsEvents
-  })
+  // ICSファイルのヘッダーとフッターを手動で作成
+  const icsHeader = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//FinCal//会計・ファイナンスイベント//JA',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:FinCal - 会計・ファイナンスイベント',
+    'X-WR-CALDESC:会計・ファイナンス系イベントのカレンダー',
+    'X-WR-TIMEZONE:Asia/Tokyo'
+  ].join('\r\n')
 
-  return new Promise((resolve, reject) => {
-    calendar((error, value) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(value)
-      }
+  const icsFooter = 'END:VCALENDAR'
+
+  // イベントを文字列に変換
+  const eventStrings = await Promise.all(
+    icsEvents.map(event => {
+      return new Promise<string>((resolve, reject) => {
+        event((error, value) => {
+          if (error) {
+            reject(error)
+          } else {
+            resolve(value)
+          }
+        })
+      })
     })
-  })
+  )
+
+  return [icsHeader, ...eventStrings, icsFooter].join('\r\n')
 } 

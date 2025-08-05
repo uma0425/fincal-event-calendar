@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Event } from '@/types/event';
+import { Event } from '@prisma/client';
 
 interface LazyEventListProps {
   events: Event[];

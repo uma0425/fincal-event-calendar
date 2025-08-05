@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
-import { Event } from '@/types/event';
+import { Event } from '@prisma/client';
 import EventCard from '@/components/EventCard';
 import LazyEventList from '@/components/LazyEventList';
 import { getCachedEvents } from '@/lib/cache';
@@ -15,16 +15,16 @@ export default function Home() {
 
   // カテゴリリストをメモ化
   const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(events.map(event => event.category)));
+    const uniqueCategories = Array.from(new Set(events.map(event => event.type)));
     return ['all', ...uniqueCategories];
   }, [events]);
 
   // フィルタリングされたイベントをメモ化
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
-      const matchesCategory = selectedCategory === 'all' || event.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || event.type === selectedCategory;
       const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           event.description.toLowerCase().includes(searchTerm.toLowerCase());
+                           (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase()));
       return matchesCategory && matchesSearch;
     });
   }, [events, selectedCategory, searchTerm]);

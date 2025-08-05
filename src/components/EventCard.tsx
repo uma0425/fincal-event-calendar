@@ -2,7 +2,7 @@
 
 import { memo, useMemo } from 'react';
 import Image from 'next/image';
-import { Event } from '@/types/event';
+import { Event } from '@prisma/client';
 
 interface EventCardProps {
   event: Event;
@@ -12,35 +12,47 @@ interface EventCardProps {
 const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
   // 日付フォーマットをメモ化
   const formattedDate = useMemo(() => {
-    const date = new Date(event.date);
+    const date = new Date(event.startAt);
     return date.toLocaleDateString('ja-JP', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       weekday: 'long',
     });
-  }, [event.date]);
+  }, [event.startAt]);
 
   // 時間フォーマットをメモ化
   const formattedTime = useMemo(() => {
-    const date = new Date(event.date);
+    const date = new Date(event.startAt);
     return date.toLocaleTimeString('ja-JP', {
       hour: '2-digit',
       minute: '2-digit',
     });
-  }, [event.date]);
+  }, [event.startAt]);
 
-  // カテゴリカラーをメモ化
-  const categoryColor = useMemo(() => {
+  // イベントタイプカラーをメモ化
+  const typeColor = useMemo(() => {
     const colors = {
-      '音楽': 'bg-purple-100 text-purple-800',
-      'スポーツ': 'bg-green-100 text-green-800',
-      '文化': 'bg-yellow-100 text-yellow-800',
-      'ビジネス': 'bg-blue-100 text-blue-800',
-      'その他': 'bg-gray-100 text-gray-800',
+      'seminar': 'bg-blue-100 text-blue-800',
+      'webinar': 'bg-green-100 text-green-800',
+      'meetup': 'bg-purple-100 text-purple-800',
+      'workshop': 'bg-orange-100 text-orange-800',
+      'other': 'bg-gray-100 text-gray-800',
     };
-    return colors[event.category as keyof typeof colors] || colors['その他'];
-  }, [event.category]);
+    return colors[event.type] || colors['other'];
+  }, [event.type]);
+
+  // イベントタイプラベルをメモ化
+  const typeLabel = useMemo(() => {
+    const labels = {
+      'seminar': 'セミナー',
+      'webinar': 'ウェビナー',
+      'meetup': 'ミートアップ',
+      'workshop': 'ワークショップ',
+      'other': 'その他',
+    };
+    return labels[event.type] || 'その他';
+  }, [event.type]);
 
   return (
     <div
@@ -66,8 +78,8 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
           <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
             {event.title}
           </h3>
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${categoryColor}`}>
-            {event.category}
+          <span className={`px-2 py-1 text-xs font-medium rounded-full ${typeColor}`}>
+            {typeLabel}
           </span>
         </div>
         
@@ -90,13 +102,13 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
           </div>
         </div>
         
-        {event.location && (
+        {event.place && (
           <div className="flex items-center mt-2 text-sm text-gray-500">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span className="line-clamp-1">{event.location}</span>
+            <span className="line-clamp-1">{event.place}</span>
           </div>
         )}
       </div>
