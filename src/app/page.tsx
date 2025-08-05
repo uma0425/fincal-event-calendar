@@ -271,7 +271,10 @@ export default function Home() {
                   ))}
                 </div>
               }>
-                <LazyEventList events={displayEvents.slice(6)} />
+                <LazyEventList 
+                  events={displayEvents.slice(6)} 
+                  renderEvent={(event) => <EventCard key={event.id} event={event} />}
+                />
               </Suspense>
             </section>
           )}
