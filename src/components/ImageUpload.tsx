@@ -18,7 +18,7 @@ export default function ImageUpload({ onImageSelect, selectedImage }: ImageUploa
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
-      const img = new Image();
+      const img = document.createElement('img');
       
       img.onload = () => {
         // 最大サイズを設定（1920x1080）
