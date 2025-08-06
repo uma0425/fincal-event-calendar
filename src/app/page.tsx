@@ -11,6 +11,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [debugInfo, setDebugInfo] = useState<any>(null)
+  const [favorites, setFavorites] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
@@ -37,6 +38,57 @@ export default function HomePage() {
       return true;
     });
   }, [events, selectedCategory]);
+
+  // お気に入り状態を取得
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const response = await fetch('/api/favorites')
+        if (response.ok) {
+          const data = await response.json()
+          const favoriteIds = data.favorites.map((fav: any) => fav.eventId)
+          setFavorites(favoriteIds)
+        }
+      } catch (error) {
+        console.error('お気に入り取得エラー:', error)
+      }
+    }
+
+    fetchFavorites()
+  }, [])
+
+  const handleFavorite = async (eventId: string) => {
+    try {
+      const isFavorite = favorites.includes(eventId)
+      
+      if (isFavorite) {
+        // お気に入りから削除
+        const response = await fetch(`/api/favorites?eventId=${eventId}`, {
+          method: 'DELETE'
+        })
+        
+        if (response.ok) {
+          setFavorites(prev => prev.filter(id => id !== eventId))
+        }
+      } else {
+        // お気に入りに追加
+        const response = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ eventId })
+        })
+        
+        if (response.ok) {
+          setFavorites(prev => [...prev, eventId])
+        }
+      }
+    } catch (error) {
+      console.error('お気に入り操作エラー:', error)
+      alert('お気に入り操作に失敗しました')
+    }
+  }
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -224,6 +276,8 @@ export default function HomePage() {
   }, []);
 
   const renderEvent = (event: Event) => {
+    const isFavorite = favorites.includes(event.id);
+
     return (
       <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
         {/* イベント画像 */}
@@ -257,8 +311,16 @@ export default function HomePage() {
           </div>
 
           {/* お気に入りボタン */}
-          <button className="absolute top-3 right-3 w-8 h-8 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200">
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button
+            onClick={() => handleFavorite(event.id)}
+            className="absolute top-3 right-3 w-8 h-8 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200"
+          >
+            <svg
+              className={`w-4 h-4 ${isFavorite ? 'text-red-500' : 'text-gray-600'}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </button>

@@ -44,9 +44,55 @@ export default function EventDetailPage() {
     }
   }, [eventId])
 
-  const handleFavorite = () => {
-    setIsFavorite(!isFavorite)
-    // TODO: お気に入り機能の実装
+  // お気に入り状態を取得
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      try {
+        const response = await fetch('/api/favorites')
+        if (response.ok) {
+          const data = await response.json()
+          const isFavorited = data.favorites.some((fav: any) => fav.eventId === eventId)
+          setIsFavorite(isFavorited)
+        }
+      } catch (error) {
+        console.error('お気に入り状態取得エラー:', error)
+      }
+    }
+
+    if (eventId) {
+      fetchFavoriteStatus()
+    }
+  }, [eventId])
+
+  const handleFavorite = async () => {
+    try {
+      if (isFavorite) {
+        // お気に入りから削除
+        const response = await fetch(`/api/favorites?eventId=${eventId}`, {
+          method: 'DELETE'
+        })
+        
+        if (response.ok) {
+          setIsFavorite(false)
+        }
+      } else {
+        // お気に入りに追加
+        const response = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ eventId })
+        })
+        
+        if (response.ok) {
+          setIsFavorite(true)
+        }
+      }
+    } catch (error) {
+      console.error('お気に入り操作エラー:', error)
+      alert('お気に入り操作に失敗しました')
+    }
   }
 
   const handleShare = () => {
