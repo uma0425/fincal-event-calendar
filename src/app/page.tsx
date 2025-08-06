@@ -30,10 +30,13 @@ export default function HomePage() {
 
   // フィルタリングされたイベントをメモ化
   const filteredEvents = useMemo(() => {
+    // eventsが配列でない場合は空配列を使用
+    const safeEvents = Array.isArray(events) ? events : [];
+    
     if (selectedCategory === 'all') {
-      return events;
+      return safeEvents;
     }
-    return events.filter(event => event.type === selectedCategory);
+    return safeEvents.filter(event => event.type === selectedCategory);
   }, [events, selectedCategory]);
 
   useEffect(() => {

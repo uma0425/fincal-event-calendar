@@ -12,6 +12,9 @@ export default function CalendarView({ events }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+  // eventsが配列でない場合は空配列を使用
+  const safeEvents = Array.isArray(events) ? events : [];
+
   // 現在の月の最初の日と最後の日を取得
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -35,7 +38,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
 
   // 指定された日付のイベントを取得
   const getEventsForDate = (date: Date) => {
-    return events.filter(event => {
+    return safeEvents.filter(event => {
       const eventDate = new Date(event.startAt);
       return eventDate.toDateString() === date.toDateString();
     });

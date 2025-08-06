@@ -21,9 +21,12 @@ export default function LazyEventList({
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
 
+  // eventsが配列でない場合は空配列を使用
+  const safeEvents = Array.isArray(events) ? events : [];
+  
   // 表示するイベントを取得
-  const visibleEvents = events.slice(0, visibleItems);
-  const hasMore = visibleItems < events.length;
+  const visibleEvents = safeEvents.slice(0, visibleItems);
+  const hasMore = visibleItems < safeEvents.length;
 
   // 次のページを読み込む
   const loadMore = useCallback(() => {
@@ -33,10 +36,10 @@ export default function LazyEventList({
     
     // 少し遅延を入れてスムーズな読み込みを実現
     setTimeout(() => {
-      setVisibleItems(prev => Math.min(prev + itemsPerPage, events.length));
+      setVisibleItems(prev => Math.min(prev + itemsPerPage, safeEvents.length));
       setIsLoading(false);
     }, 300);
-  }, [isLoading, hasMore, itemsPerPage, events.length]);
+  }, [isLoading, hasMore, itemsPerPage, safeEvents.length]);
 
   // Intersection Observerの設定
   useEffect(() => {
@@ -71,7 +74,7 @@ export default function LazyEventList({
   // イベントが変更されたら表示数をリセット
   useEffect(() => {
     setVisibleItems(itemsPerPage);
-  }, [events.length, itemsPerPage]);
+  }, [safeEvents.length, itemsPerPage]);
 
   return (
     <div className="space-y-6">
@@ -107,7 +110,7 @@ export default function LazyEventList({
       )}
       
       {/* 完了メッセージ */}
-      {!hasMore && events.length > 0 && (
+      {!hasMore && safeEvents.length > 0 && (
         <div className="text-center py-8">
           <div className="inline-flex items-center space-x-2 text-gray-500">
             <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -24,8 +24,10 @@ export default function FavoritesPage() {
         if (response.ok) {
           const data = await response.json();
           const events = data.events || [];
+          // eventsが配列でない場合は空配列を使用
+          const safeEvents = Array.isArray(events) ? events : [];
           // お気に入りに含まれるイベントのみをフィルタリング
-          const filteredEvents = events.filter((event: Event) => 
+          const filteredEvents = safeEvents.filter((event: Event) => 
             favorites.includes(event.id)
           );
           setFavoriteEvents(filteredEvents);
