@@ -76,15 +76,25 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
       <div className="relative">
         {event.imageUrl ? (
           <div className="relative h-48 overflow-hidden">
-            <Image
-              src={event.imageUrl}
-              alt={event.title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-              priority={false}
-              loading="lazy"
-            />
+            {event.imageUrl.startsWith('data:') ? (
+              // data URLの場合は通常のimgタグを使用
+              <img
+                src={event.imageUrl}
+                alt={event.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              // 外部URLの場合はNext.jsのImageコンポーネントを使用
+              <Image
+                src={event.imageUrl}
+                alt={event.title}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                priority={false}
+                loading="lazy"
+              />
+            )}
           </div>
         ) : (
           <div className="h-48 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">

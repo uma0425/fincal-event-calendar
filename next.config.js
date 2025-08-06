@@ -1,18 +1,33 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost'],
-    unoptimized: true,
-  },
-  // APIルートの静的生成を無効にする
-  async rewrites() {
-    return [
+    remotePatterns: [
       {
-        source: '/api/:path*',
-        destination: '/api/:path*',
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
       },
-    ]
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client']
+  }
 }
 
 module.exports = nextConfig 
