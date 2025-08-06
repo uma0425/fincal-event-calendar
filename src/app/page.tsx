@@ -133,26 +133,34 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* ヘッダー */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-gray-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <div className="text-2xl font-bold text-blue-600">FinCal</div>
-              <nav className="hidden md:flex space-x-8">
-                <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">イベント</a>
-                <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">カレンダー</a>
-                <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">お気に入り</a>
-                <a href="/admin" className="text-gray-700 hover:text-blue-600 transition-colors">管理者</a>
-              </nav>
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold text-blue-600">FinCal</h1>
+              <span className="ml-2 text-sm text-gray-500">イベントカレンダー</span>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="text-gray-700 hover:text-blue-600 transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5z" />
+              <a
+                href="/favorites"
+                className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-              </button>
-              <a href="/submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                お気に入り
+              </a>
+              <a
+                href="/submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              >
                 イベント投稿
+              </a>
+              <a
+                href="/admin"
+                className="text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                管理画面
               </a>
             </div>
           </div>
