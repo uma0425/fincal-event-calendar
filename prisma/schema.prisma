@@ -39,6 +39,7 @@ model User {
 
   // Relations
   events Event[]
+  favorites Favorite[]
 
   @@map("users")
 }
@@ -66,6 +67,21 @@ model Event {
 
   // Relations（オプショナル）
   user User? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  favorites Favorite[]
 
   @@map("events")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@map("favorites")
 } 
