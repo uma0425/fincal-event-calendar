@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// 個別イベント取得
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const eventId = params.id
+
+    if (!eventId) {
+      return NextResponse.json(
+        { success: false, error: 'イベントIDが指定されていません' },
+        { status: 400 }
+      )
+    }
+
     // データベース接続チェック
     if (!prisma) {
       return NextResponse.json(
@@ -15,10 +23,11 @@ export async function GET(
       )
     }
 
-    const { id } = params
-
+    // イベントを取得
     const event = await prisma.event.findUnique({
-      where: { id }
+      where: {
+        id: eventId
+      }
     })
 
     if (!event) {
@@ -28,13 +37,21 @@ export async function GET(
       )
     }
 
+    // 公開済みイベントのみアクセス可能（管理者以外）
+    if (event.status !== 'published') {
+      return NextResponse.json(
+        { success: false, error: 'このイベントは公開されていません' },
+        { status: 403 }
+      )
+    }
+
     return NextResponse.json({
       success: true,
-      data: event
+      event: event
     })
 
   } catch (error) {
-    console.error('イベント取得エラー:', error)
+    console.error('イベント詳細取得エラー:', error)
     
     let errorMessage = 'イベントの取得に失敗しました'
     if (error instanceof Error) {
