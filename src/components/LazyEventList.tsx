@@ -86,11 +86,14 @@ export default function LazyEventList({
     <div className="space-y-8">
       {/* イベントグリッド */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {visibleEvents.map((event) => (
-          <div key={event.id} className="animate-fade-in">
-            {renderEvent(event)}
-          </div>
-        ))}
+        {visibleEvents.map((event) => {
+          console.log('イベントカードをレンダリング:', event.id, event.title);
+          return (
+            <div key={event.id} className="animate-fade-in">
+              {renderEvent(event)}
+            </div>
+          );
+        })}
       </div>
       
       {/* 読み込みインジケーター */}
