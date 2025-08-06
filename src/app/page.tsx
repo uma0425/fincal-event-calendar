@@ -73,13 +73,58 @@ export default function HomePage() {
               createdAt: new Date(),
               updatedAt: new Date(),
               createdBy: null
+            },
+            {
+              id: 'sample-2',
+              title: 'FinTechセミナー',
+              description: '最新のFinTechトレンドについて学ぶセミナー',
+              startAt: new Date('2024-12-20T14:00:00+09:00'),
+              endAt: new Date('2024-12-20T16:00:00+09:00'),
+              type: 'seminar',
+              organizer: 'FinTech協会',
+              place: '東京国際フォーラム',
+              registerUrl: 'https://example.com',
+              fee: 5000,
+              target: 'FinTech関係者',
+              imageUrl: 'https://via.placeholder.com/800x400/10b981/ffffff?text=FinTechセミナー',
+              prefecture: '東京都',
+              status: 'published',
+              maxParticipants: 100,
+              location: '東京国際フォーラム',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              createdBy: null
+            },
+            {
+              id: 'sample-3',
+              title: 'ブロックチェーン技術ワークショップ',
+              description: 'ブロックチェーン技術の基礎から応用まで実践的に学べます',
+              startAt: new Date('2024-12-25T10:00:00+09:00'),
+              endAt: new Date('2024-12-25T17:00:00+09:00'),
+              type: 'workshop',
+              organizer: 'ブロックチェーン研究所',
+              place: '大阪ビジネスパーク',
+              registerUrl: 'https://example.com',
+              fee: 8000,
+              target: '開発者',
+              imageUrl: 'https://via.placeholder.com/800x400/8b5cf6/ffffff?text=ブロックチェーン技術ワークショップ',
+              prefecture: '大阪府',
+              status: 'published',
+              maxParticipants: 30,
+              location: '大阪ビジネスパーク',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              createdBy: null
             }
           ];
           setEvents(sampleEvents);
           setError('データベース接続が設定されていません。サンプルデータを表示しています。');
         } else if (response.ok) {
           const data = await response.json();
-          setEvents(data.events || []);
+          console.log('APIレスポンス:', data);
+          const events = data.events || data.data || [];
+          console.log('取得したイベント数:', events.length);
+          setEvents(events);
         } else {
           throw new Error('イベントの取得に失敗しました');
         }
