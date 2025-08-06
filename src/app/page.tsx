@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { Event } from '@prisma/client';
-import EventCard from '@/components/EventCard';
 import LazyEventList from '@/components/LazyEventList';
 import CalendarView from '@/components/CalendarView';
 import { getCachedEvents } from '@/lib/cache';
@@ -29,49 +28,34 @@ export default function HomePage() {
     return cats.map(cat => ({ value: cat, label: labels[cat as keyof typeof labels] }));
   }, []);
 
-  // フィルタリングされたイベントをメモ化
+  // フィルタリングされたイベント
   const filteredEvents = useMemo(() => {
-    // eventsが配列でない場合は空配列を使用
-    const safeEvents = Array.isArray(events) ? events : [];
-    
-    if (selectedCategory === 'all') {
-      return safeEvents;
-    }
-    return safeEvents.filter(event => event.type === selectedCategory);
+    return events.filter(event => {
+      if (selectedCategory !== 'all' && event.type !== selectedCategory) {
+        return false;
+      }
+      return true;
+    });
   }, [events, selectedCategory]);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        console.log('イベント取得開始');
-        
-        // デバッグ情報を取得
-        try {
-          const debugResponse = await fetch('/api/debug');
-          const debugData = await debugResponse.json();
-          console.log('デバッグ情報:', debugData);
-          setDebugInfo(debugData);
-        } catch (debugError) {
-          console.error('デバッグ情報取得エラー:', debugError);
+        // デバッグ情報を取得（開発時のみ）
+        if (process.env.NODE_ENV === 'development') {
+          try {
+            const debugResponse = await fetch('/api/debug');
+            const debugData = await debugResponse.json();
+            setDebugInfo(debugData);
+          } catch (debugError) {
+            console.error('デバッグ情報取得エラー:', debugError);
+          }
         }
         
-        // キャッシュ機能を一時的に無効化
-        /*
-        const cachedEvents = await getCachedEvents();
-        if (cachedEvents) {
-          console.log('キャッシュからイベントを取得:', cachedEvents.length);
-          setEvents(cachedEvents);
-          setLoading(false);
-          return;
-        }
-        */
-
-        console.log('APIからイベントを取得中...');
+        // APIからイベントを取得
         const response = await fetch('/api/events');
-        console.log('APIレスポンスステータス:', response.status);
         
         if (response.status === 503) {
-          console.log('データベース接続エラー - サンプルデータを表示');
           // データベース接続エラーの場合、サンプルデータを表示
           const sampleEvents: Event[] = [
             {
@@ -138,21 +122,14 @@ export default function HomePage() {
               createdBy: null
             }
           ];
-          console.log('サンプルイベントを設定:', sampleEvents.length);
           setEvents(sampleEvents);
           setError('データベース接続が設定されていません。サンプルデータを表示しています。');
         } else if (response.ok) {
           const data = await response.json();
-          console.log('APIレスポンス全体:', data);
-          console.log('APIレスポンスの型:', typeof data);
-          console.log('APIレスポンスのキー:', Object.keys(data));
-          
           const events = data.events || data.data || [];
-          console.log('取得したイベント数:', events.length);
-          console.log('取得したイベントの内容:', events);
           
           if (events.length === 0) {
-            console.log('イベントが0件のため、サンプルデータを表示');
+            // イベントが0件の場合、サンプルデータを表示
             const sampleEvents: Event[] = [
               {
                 id: 'sample-1',
@@ -230,26 +207,15 @@ export default function HomePage() {
               updatedAt: new Date(event.updatedAt)
             }));
             
-            console.log('処理後のイベント:', processedEvents);
-            console.log('処理後のイベントの詳細:', processedEvents.map(e => ({
-              id: e.id,
-              title: e.title,
-              type: e.type,
-              status: e.status,
-              startAt: e.startAt,
-              organizer: e.organizer
-            })));
             setEvents(processedEvents);
           }
         } else {
-          console.error('APIエラー:', response.status, response.statusText);
-          throw new Error('イベントの取得に失敗しました');
+          throw new Error(`イベントの取得に失敗しました (${response.status})`);
         }
       } catch (error) {
         console.error('イベント取得エラー:', error);
-        setError('イベントの取得に失敗しました');
+        setError(error instanceof Error ? error.message : 'イベントの取得に失敗しました');
       } finally {
-        console.log('ローディング完了');
         setLoading(false);
       }
     };
@@ -258,7 +224,6 @@ export default function HomePage() {
   }, []);
 
   const renderEvent = (event: Event) => {
-    console.log('renderEvent関数が呼ばれました:', event.id, event.title);
     return (
       <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
         {/* イベント画像 */}
@@ -380,7 +345,10 @@ export default function HomePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="flex justify-center items-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 font-medium">イベントを読み込み中...</p>
+          </div>
         </div>
       </div>
     );
