@@ -42,15 +42,97 @@ export default function HomePage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        console.log('イベント取得開始');
+        
+        // テスト用：強制的にサンプルデータを表示
+        console.log('テスト用：サンプルデータを強制表示');
+        const sampleEvents: Event[] = [
+          {
+            id: 'sample-1',
+            title: '会計士交流会',
+            description: '会計士同士の情報交換とネットワーキング',
+            startAt: new Date('2024-12-15T19:00:00+09:00'),
+            endAt: new Date('2024-12-15T21:00:00+09:00'),
+            type: 'meetup',
+            organizer: '日本会計士協会',
+            place: '東京会館',
+            registerUrl: 'https://example.com',
+            fee: 0,
+            target: '会計士',
+            imageUrl: 'https://via.placeholder.com/800x400/2563eb/ffffff?text=会計士交流会',
+            prefecture: '東京都',
+            status: 'published',
+            maxParticipants: 50,
+            location: '東京会館',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            createdBy: null
+          },
+          {
+            id: 'sample-2',
+            title: 'FinTechセミナー',
+            description: '最新のFinTechトレンドについて学ぶセミナー',
+            startAt: new Date('2024-12-20T14:00:00+09:00'),
+            endAt: new Date('2024-12-20T16:00:00+09:00'),
+            type: 'seminar',
+            organizer: 'FinTech協会',
+            place: '東京国際フォーラム',
+            registerUrl: 'https://example.com',
+            fee: 5000,
+            target: 'FinTech関係者',
+            imageUrl: 'https://via.placeholder.com/800x400/10b981/ffffff?text=FinTechセミナー',
+            prefecture: '東京都',
+            status: 'published',
+            maxParticipants: 100,
+            location: '東京国際フォーラム',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            createdBy: null
+          },
+          {
+            id: 'sample-3',
+            title: 'ブロックチェーン技術ワークショップ',
+            description: 'ブロックチェーン技術の基礎から応用まで実践的に学べます',
+            startAt: new Date('2024-12-25T10:00:00+09:00'),
+            endAt: new Date('2024-12-25T17:00:00+09:00'),
+            type: 'workshop',
+            organizer: 'ブロックチェーン研究所',
+            place: '大阪ビジネスパーク',
+            registerUrl: 'https://example.com',
+            fee: 8000,
+            target: '開発者',
+            imageUrl: 'https://via.placeholder.com/800x400/8b5cf6/ffffff?text=ブロックチェーン技術ワークショップ',
+            prefecture: '大阪府',
+            status: 'published',
+            maxParticipants: 30,
+            location: '大阪ビジネスパーク',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            createdBy: null
+          }
+        ];
+        console.log('サンプルイベントを設定:', sampleEvents.length);
+        setEvents(sampleEvents);
+        setError('テスト用：サンプルデータを表示しています。');
+        setLoading(false);
+        return;
+
+        // 以下は一時的にコメントアウト
+        /*
         const cachedEvents = await getCachedEvents();
         if (cachedEvents) {
+          console.log('キャッシュからイベントを取得:', cachedEvents.length);
           setEvents(cachedEvents);
           setLoading(false);
           return;
         }
 
+        console.log('APIからイベントを取得中...');
         const response = await fetch('/api/events');
+        console.log('APIレスポンスステータス:', response.status);
+        
         if (response.status === 503) {
+          console.log('データベース接続エラー - サンプルデータを表示');
           // データベース接続エラーの場合、サンプルデータを表示
           const sampleEvents: Event[] = [
             {
@@ -117,6 +199,7 @@ export default function HomePage() {
               createdBy: null
             }
           ];
+          console.log('サンプルイベントを設定:', sampleEvents.length);
           setEvents(sampleEvents);
           setError('データベース接続が設定されていません。サンプルデータを表示しています。');
         } else if (response.ok) {
@@ -126,12 +209,15 @@ export default function HomePage() {
           console.log('取得したイベント数:', events.length);
           setEvents(events);
         } else {
+          console.error('APIエラー:', response.status, response.statusText);
           throw new Error('イベントの取得に失敗しました');
         }
+        */
       } catch (error) {
         console.error('イベント取得エラー:', error);
         setError('イベントの取得に失敗しました');
       } finally {
+        console.log('ローディング完了');
         setLoading(false);
       }
     };

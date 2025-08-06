@@ -24,9 +24,15 @@ export default function LazyEventList({
   // eventsが配列でない場合は空配列を使用
   const safeEvents = Array.isArray(events) ? events : [];
   
+  console.log('LazyEventList - 受け取ったイベント数:', events?.length);
+  console.log('LazyEventList - safeEvents数:', safeEvents.length);
+  
   // 表示するイベントを取得
   const visibleEvents = safeEvents.slice(0, visibleItems);
   const hasMore = visibleItems < safeEvents.length;
+  
+  console.log('LazyEventList - 表示するイベント数:', visibleEvents.length);
+  console.log('LazyEventList - さらに読み込み可能:', hasMore);
 
   // 次のページを読み込む
   const loadMore = useCallback(() => {
