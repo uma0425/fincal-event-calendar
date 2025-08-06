@@ -29,6 +29,8 @@ export default function FavoritesPage() {
             favorites.includes(event.id)
           );
           setFavoriteEvents(filteredEvents);
+          console.log('お気に入りイベント:', filteredEvents.length, '件');
+          console.log('お気に入りID:', favorites);
         } else {
           throw new Error('イベントの取得に失敗しました');
         }
