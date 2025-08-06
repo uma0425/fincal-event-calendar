@@ -143,7 +143,18 @@ export default function HomePage() {
           console.log('APIレスポンス:', data);
           const events = data.events || data.data || [];
           console.log('取得したイベント数:', events.length);
-          setEvents(events);
+          
+          // 日付文字列をDateオブジェクトに変換
+          const processedEvents = events.map((event: any) => ({
+            ...event,
+            startAt: new Date(event.startAt),
+            endAt: new Date(event.endAt),
+            createdAt: new Date(event.createdAt),
+            updatedAt: new Date(event.updatedAt)
+          }));
+          
+          console.log('処理後のイベント:', processedEvents);
+          setEvents(processedEvents);
         } else {
           console.error('APIエラー:', response.status, response.statusText);
           throw new Error('イベントの取得に失敗しました');
@@ -161,7 +172,119 @@ export default function HomePage() {
   }, []);
 
   const renderEvent = (event: Event) => (
-    <EventCard key={event.id} event={event} />
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      {/* イベント画像 */}
+      <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
+        {event.imageUrl ? (
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-white text-center">
+              <svg className="w-16 h-16 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-sm font-medium">イベント</p>
+            </div>
+          </div>
+        )}
+        
+        {/* イベントタイプバッジ */}
+        <div className="absolute top-3 left-3">
+          <span className="bg-white bg-opacity-90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
+            {event.type === 'seminar' && 'セミナー'}
+            {event.type === 'webinar' && 'ウェビナー'}
+            {event.type === 'meetup' && 'ミートアップ'}
+            {event.type === 'workshop' && 'ワークショップ'}
+            {event.type === 'other' && 'その他'}
+          </span>
+        </div>
+
+        {/* お気に入りボタン */}
+        <button className="absolute top-3 right-3 w-8 h-8 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200">
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
+      </div>
+
+      {/* イベント情報 */}
+      <div className="p-4">
+        {/* タイトル */}
+        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+          {event.title}
+        </h3>
+
+        {/* 日時 */}
+        <div className="flex items-center text-sm text-gray-600 mb-3">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span>
+            {new Date(event.startAt).toLocaleDateString('ja-JP', {
+              month: 'short',
+              day: 'numeric',
+              weekday: 'short'
+            })}
+            {' '}
+            {new Date(event.startAt).toLocaleTimeString('ja-JP', {
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
+        </div>
+
+        {/* 場所 */}
+        {event.place && (
+          <div className="flex items-center text-sm text-gray-600 mb-3">
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="line-clamp-1">{event.place}</span>
+          </div>
+        )}
+
+        {/* 主催者 */}
+        {event.organizer && (
+          <div className="flex items-center text-sm text-gray-600 mb-3">
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className="line-clamp-1">{event.organizer}</span>
+          </div>
+        )}
+
+        {/* 参加費 */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <span className="text-lg font-bold text-gray-900">
+              {event.fee === 0 ? '無料' : `¥${event.fee.toLocaleString()}`}
+            </span>
+            {event.fee > 0 && (
+              <span className="text-sm text-gray-500 ml-1">/人</span>
+            )}
+          </div>
+          
+          {/* 参加ボタン */}
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+            詳細を見る
+          </button>
+        </div>
+
+        {/* タグ */}
+        {event.target && (
+          <div className="flex flex-wrap gap-1">
+            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">
+              {event.target}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
   );
 
   if (loading) {
@@ -177,35 +300,50 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* ヘッダー */}
-      <header className="bg-white shadow-sm border-b border-gray-200 mb-8">
+      <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+            {/* ロゴ */}
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-blue-600">FinCal</h1>
-              <span className="ml-2 text-sm text-gray-500">イベントカレンダー</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="text-xl font-bold text-gray-900">FinCal</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
+
+            {/* ナビゲーション */}
+            <nav className="hidden md:flex items-center space-x-8">
               <a
                 href="/favorites"
-                className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
               >
-                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
                 お気に入り
               </a>
               <a
                 href="/submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 イベント投稿
               </a>
               <a
                 href="/admin"
-                className="text-gray-600 hover:text-blue-600 transition-colors"
+                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
               >
                 管理画面
               </a>
+            </nav>
+
+            {/* モバイルメニュー */}
+            <div className="md:hidden">
+              <button className="text-gray-600 hover:text-blue-600 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -234,8 +372,8 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* デバッグ情報 */}
-        {debugInfo && (
+        {/* デバッグ情報（開発時のみ表示） */}
+        {process.env.NODE_ENV === 'development' && debugInfo && (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">デバッグ情報</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -271,45 +409,51 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* 表示モード切り替え */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex space-x-2">
-            {categories.map(category => (
+        {/* 検索・フィルターセクション */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* カテゴリフィルター */}
+            <div className="flex-1">
+              <div className="flex flex-wrap gap-2">
+                {categories.map(category => (
+                  <button
+                    key={category.value}
+                    onClick={() => setSelectedCategory(category.value)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                      selectedCategory === category.value
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 表示モード切り替え */}
+            <div className="flex bg-gray-100 rounded-full p-1">
               <button
-                key={category.value}
-                onClick={() => setSelectedCategory(category.value)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  selectedCategory === category.value
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                onClick={() => setViewMode('list')}
+                className={`px-6 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                  viewMode === 'list'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
                 }`}
               >
-                {category.label}
+                リスト表示
               </button>
-            ))}
-          </div>
-
-          <div className="flex bg-white rounded-md shadow-sm">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-4 py-2 text-sm font-medium rounded-l-md transition-colors ${
-                viewMode === 'list'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              リスト表示
-            </button>
-            <button
-              onClick={() => setViewMode('calendar')}
-              className={`px-4 py-2 text-sm font-medium rounded-r-md transition-colors ${
-                viewMode === 'calendar'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              カレンダー表示
-            </button>
+              <button
+                onClick={() => setViewMode('calendar')}
+                className={`px-6 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                  viewMode === 'calendar'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                カレンダー表示
+              </button>
+            </div>
           </div>
         </div>
 
