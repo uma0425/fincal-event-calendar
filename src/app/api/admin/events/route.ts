@@ -1,20 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 import { EventStatus } from '@prisma/client'
+
+// Prismaクライアントの初期化をより安全に行う
+let prisma: PrismaClient
+
+try {
+  prisma = new PrismaClient()
+} catch (error) {
+  console.error('Prismaクライアント初期化エラー:', error)
+  prisma = null as any
+}
 
 // 管理者用イベント一覧取得
 export async function GET(request: NextRequest) {
   try {
-    // データベース接続チェック
     if (!prisma) {
       return NextResponse.json(
-        { success: false, error: 'データベース接続が設定されていません' },
+        { success: false, error: 'データベース接続が利用できません' },
         { status: 503 }
       )
     }
 
+    // データベース接続テスト
+    await prisma.$connect()
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
+
+    console.log('管理者イベント取得リクエスト:', { status })
 
     const where: any = {}
 
@@ -29,6 +43,8 @@ export async function GET(request: NextRequest) {
         createdAt: 'desc'
       }
     })
+
+    console.log('取得したイベント数:', events.length)
 
     return NextResponse.json({
       success: true,
@@ -52,14 +68,30 @@ export async function GET(request: NextRequest) {
       { success: false, error: errorMessage },
       { status: 500 }
     )
+  } finally {
+    if (prisma) {
+      await prisma.$disconnect()
+    }
   }
 }
 
 // 管理者用：イベントステータス更新
 export async function PATCH(request: NextRequest) {
   try {
+    if (!prisma) {
+      return NextResponse.json(
+        { success: false, error: 'データベース接続が利用できません' },
+        { status: 503 }
+      )
+    }
+
+    // データベース接続テスト
+    await prisma.$connect()
+
     const body = await request.json()
     const { eventId, status } = body
+
+    console.log('イベントステータス更新リクエスト:', { eventId, status })
 
     if (!eventId || !status) {
       return NextResponse.json(
@@ -81,6 +113,8 @@ export async function PATCH(request: NextRequest) {
       }
     })
 
+    console.log('イベントステータス更新完了:', { eventId, status })
+
     return NextResponse.json({
       success: true,
       data: updatedEvent
@@ -91,5 +125,9 @@ export async function PATCH(request: NextRequest) {
       { success: false, error: 'イベントの更新に失敗しました' },
       { status: 500 }
     )
+  } finally {
+    if (prisma) {
+      await prisma.$disconnect()
+    }
   }
 } 

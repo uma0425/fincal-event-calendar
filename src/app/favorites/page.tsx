@@ -251,6 +251,12 @@ export default function FavoritesPage() {
             >
               ホームに戻る
             </a>
+            <a
+              href="/admin"
+              className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+            >
+              管理画面
+            </a>
           </div>
         </div>
       </header>
