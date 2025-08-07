@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 
-// お気に入り一覧取得
+const prisma = new PrismaClient()
+
 export async function GET(request: NextRequest) {
+  console.log('お気に入りGET APIが呼び出されました');
+  
   try {
-    // データベース接続チェック
-    if (!prisma) {
-      return NextResponse.json(
-        { success: false, error: 'データベース接続が設定されていません' },
-        { status: 503 }
-      )
-    }
-
-    // セッションからユーザーIDを取得（簡易版）
-    // 実際の実装では認証システムを使用
-    const userId = 'anonymous' // 仮のユーザーID
+    // 現在は匿名ユーザーとして扱う
+    const userId = 'anonymous'
+    console.log('ユーザーID:', userId);
 
     // お気に入りイベントを取得
     const favorites = await prisma.favorite.findMany({
@@ -23,58 +18,50 @@ export async function GET(request: NextRequest) {
       },
       include: {
         event: true
-      },
-      orderBy: {
-        createdAt: 'desc'
       }
     })
 
+    console.log('取得したお気に入り数:', favorites.length);
+    console.log('お気に入り詳細:', favorites);
+
     return NextResponse.json({
       success: true,
-      favorites: favorites.map(fav => ({
-        id: fav.id,
-        eventId: fav.eventId,
-        userId: fav.userId,
-        createdAt: fav.createdAt,
-        event: fav.event
-      }))
+      favorites: favorites
     })
-
   } catch (error) {
-    console.error('お気に入り取得エラー:', error)
-    
+    console.error('お気に入り取得エラー:', error);
     return NextResponse.json(
-      { success: false, error: 'お気に入りの取得に失敗しました' },
+      { 
+        success: false, 
+        error: 'お気に入りの取得に失敗しました',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
 }
 
-// お気に入り追加
 export async function POST(request: NextRequest) {
+  console.log('お気に入りPOST APIが呼び出されました');
+  
   try {
-    // データベース接続チェック
-    if (!prisma) {
-      return NextResponse.json(
-        { success: false, error: 'データベース接続が設定されていません' },
-        { status: 503 }
-      )
-    }
-
     const body = await request.json()
     const { eventId } = body
+    console.log('リクエストボディ:', body);
 
     if (!eventId) {
+      console.error('eventIdが提供されていません');
       return NextResponse.json(
-        { success: false, error: 'イベントIDが指定されていません' },
+        { success: false, error: 'eventIdが必要です' },
         { status: 400 }
       )
     }
 
-    // セッションからユーザーIDを取得（簡易版）
-    const userId = 'anonymous' // 仮のユーザーID
+    // 現在は匿名ユーザーとして扱う
+    const userId = 'anonymous'
+    console.log('ユーザーID:', userId, 'イベントID:', eventId);
 
-    // 既にお気に入りに追加されているかチェック
+    // 既存のお気に入りをチェック
     const existingFavorite = await prisma.favorite.findFirst({
       where: {
         userId: userId,
@@ -83,9 +70,10 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingFavorite) {
+      console.log('既にお気に入りに追加されています');
       return NextResponse.json(
         { success: false, error: '既にお気に入りに追加されています' },
-        { status: 400 }
+        { status: 409 }
       )
     }
 
@@ -100,50 +88,44 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    console.log('お気に入り追加完了:', favorite);
+
     return NextResponse.json({
       success: true,
-      favorite: {
-        id: favorite.id,
-        eventId: favorite.eventId,
-        userId: favorite.userId,
-        createdAt: favorite.createdAt,
-        event: favorite.event
-      }
+      favorite: favorite
     })
-
   } catch (error) {
-    console.error('お気に入り追加エラー:', error)
-    
+    console.error('お気に入り追加エラー:', error);
     return NextResponse.json(
-      { success: false, error: 'お気に入りの追加に失敗しました' },
+      { 
+        success: false, 
+        error: 'お気に入りの追加に失敗しました',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
 }
 
-// お気に入り削除
 export async function DELETE(request: NextRequest) {
+  console.log('お気に入りDELETE APIが呼び出されました');
+  
   try {
-    // データベース接続チェック
-    if (!prisma) {
-      return NextResponse.json(
-        { success: false, error: 'データベース接続が設定されていません' },
-        { status: 503 }
-      )
-    }
-
     const { searchParams } = new URL(request.url)
     const eventId = searchParams.get('eventId')
+    console.log('削除対象イベントID:', eventId);
 
     if (!eventId) {
+      console.error('eventIdが提供されていません');
       return NextResponse.json(
-        { success: false, error: 'イベントIDが指定されていません' },
+        { success: false, error: 'eventIdが必要です' },
         { status: 400 }
       )
     }
 
-    // セッションからユーザーIDを取得（簡易版）
-    const userId = 'anonymous' // 仮のユーザーID
+    // 現在は匿名ユーザーとして扱う
+    const userId = 'anonymous'
+    console.log('ユーザーID:', userId);
 
     // お気に入りを削除
     const deletedFavorite = await prisma.favorite.deleteMany({
@@ -153,16 +135,20 @@ export async function DELETE(request: NextRequest) {
       }
     })
 
+    console.log('削除されたお気に入り数:', deletedFavorite.count);
+
     return NextResponse.json({
       success: true,
-      message: 'お気に入りから削除しました'
+      deletedCount: deletedFavorite.count
     })
-
   } catch (error) {
-    console.error('お気に入り削除エラー:', error)
-    
+    console.error('お気に入り削除エラー:', error);
     return NextResponse.json(
-      { success: false, error: 'お気に入りの削除に失敗しました' },
+      { 
+        success: false, 
+        error: 'お気に入りの削除に失敗しました',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }

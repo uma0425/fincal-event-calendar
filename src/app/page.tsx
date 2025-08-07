@@ -58,20 +58,30 @@ export default function HomePage() {
   }, [])
 
   const handleFavorite = async (eventId: string) => {
+    console.log('お気に入りボタンがクリックされました:', eventId);
     try {
       const isFavorite = favorites.includes(eventId)
+      console.log('現在のお気に入り状態:', isFavorite);
       
       if (isFavorite) {
         // お気に入りから削除
+        console.log('お気に入りから削除中...');
         const response = await fetch(`/api/favorites?eventId=${eventId}`, {
           method: 'DELETE'
         })
         
+        console.log('削除APIレスポンス:', response.status);
         if (response.ok) {
           setFavorites(prev => prev.filter(id => id !== eventId))
+          console.log('お気に入りから削除完了');
+        } else {
+          const errorData = await response.text();
+          console.error('削除APIエラー:', errorData);
+          throw new Error('お気に入りから削除に失敗しました')
         }
       } else {
         // お気に入りに追加
+        console.log('お気に入りに追加中...');
         const response = await fetch('/api/favorites', {
           method: 'POST',
           headers: {
@@ -80,8 +90,14 @@ export default function HomePage() {
           body: JSON.stringify({ eventId })
         })
         
+        console.log('追加APIレスポンス:', response.status);
         if (response.ok) {
           setFavorites(prev => [...prev, eventId])
+          console.log('お気に入りに追加完了');
+        } else {
+          const errorData = await response.text();
+          console.error('追加APIエラー:', errorData);
+          throw new Error('お気に入りに追加に失敗しました')
         }
       }
     } catch (error) {
@@ -313,11 +329,12 @@ export default function HomePage() {
           {/* お気に入りボタン */}
           <button
             onClick={() => handleFavorite(event.id)}
-            className="absolute top-3 right-3 w-8 h-8 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200"
+            className="absolute top-3 right-3 w-8 h-8 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 hover:scale-110 transition-all duration-200 z-10 cursor-pointer shadow-md"
+            title={isFavorite ? "お気に入りから削除" : "お気に入りに追加"}
           >
             <svg
-              className={`w-4 h-4 ${isFavorite ? 'text-red-500' : 'text-gray-600'}`}
-              fill="none"
+              className={`w-4 h-4 ${isFavorite ? 'text-red-500 fill-current' : 'text-gray-600'}`}
+              fill={isFavorite ? "currentColor" : "none"}
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
