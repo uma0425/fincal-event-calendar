@@ -3,12 +3,42 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// 匿名ユーザーを取得または作成する関数
+async function getOrCreateAnonymousUser() {
+  try {
+    // 既存の匿名ユーザーを検索
+    let user = await prisma.user.findFirst({
+      where: {
+        email: 'anonymous@fincal.local'
+      }
+    })
+
+    // 匿名ユーザーが存在しない場合は作成
+    if (!user) {
+      console.log('匿名ユーザーを作成中...');
+      user = await prisma.user.create({
+        data: {
+          email: 'anonymous@fincal.local',
+          name: 'Anonymous User',
+          role: 'user'
+        }
+      })
+      console.log('匿名ユーザー作成完了:', user.id);
+    }
+
+    return user.id
+  } catch (error) {
+    console.error('匿名ユーザー取得/作成エラー:', error);
+    throw error
+  }
+}
+
 export async function GET(request: NextRequest) {
   console.log('お気に入りGET APIが呼び出されました');
   
   try {
-    // 現在は匿名ユーザーとして扱う
-    const userId = 'anonymous'
+    // 匿名ユーザーを取得または作成
+    const userId = await getOrCreateAnonymousUser()
     console.log('ユーザーID:', userId);
 
     // お気に入りイベントを取得
@@ -57,9 +87,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 現在は匿名ユーザーとして扱う
-    const userId = 'anonymous'
+    // 匿名ユーザーを取得または作成
+    const userId = await getOrCreateAnonymousUser()
     console.log('ユーザーID:', userId, 'イベントID:', eventId);
+
+    // イベントが存在するかチェック
+    const event = await prisma.event.findUnique({
+      where: { id: eventId }
+    })
+
+    if (!event) {
+      console.error('指定されたイベントが存在しません:', eventId);
+      return NextResponse.json(
+        { success: false, error: '指定されたイベントが存在しません' },
+        { status: 404 }
+      )
+    }
 
     // 既存のお気に入りをチェック
     const existingFavorite = await prisma.favorite.findFirst({
@@ -123,8 +166,8 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // 現在は匿名ユーザーとして扱う
-    const userId = 'anonymous'
+    // 匿名ユーザーを取得または作成
+    const userId = await getOrCreateAnonymousUser()
     console.log('ユーザーID:', userId);
 
     // お気に入りを削除
