@@ -18,7 +18,6 @@ export default function HomePage() {
   const [selectedDateRange, setSelectedDateRange] = useState<string>('all');
   const [selectedPrefecture, setSelectedPrefecture] = useState<string>('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [isIcsLoading, setIsIcsLoading] = useState(false);
 
   // カテゴリをメモ化
   const categories = useMemo(() => {
@@ -218,37 +217,6 @@ export default function HomePage() {
   }
 
   // ICS購読処理
-  const handleIcsDownload = async () => {
-    setIsIcsLoading(true)
-    try {
-      const response = await fetch('/api/calendar.ics')
-      
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'fincal-events.ics'
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-        
-        // 成功メッセージ
-        alert('カレンダーファイルをダウンロードしました。お使いのカレンダーアプリにインポートしてください。')
-      } else {
-        const errorData = await response.json()
-        console.error('ICSダウンロードエラー:', errorData)
-        alert('カレンダーファイルのダウンロードに失敗しました。しばらく時間をおいてから再度お試しください。')
-      }
-    } catch (error) {
-      console.error('ICSダウンロードエラー:', error)
-      alert('カレンダーファイルのダウンロードに失敗しました。しばらく時間をおいてから再度お試しください。')
-    } finally {
-      setIsIcsLoading(false)
-    }
-  }
-
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -634,34 +602,13 @@ export default function HomePage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* タイトルセクション */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 pt-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             FinCal — みんなでつくる、みんなのイベント表
           </h1>
           <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
             誰でもサクッと投稿・シェアできるオープンカレンダーです。勉強会から交流会まで、最新の会計・ファイナンス系イベントがひと目でわかります。
           </p>
-          
-          {/* ICS購読ボタン */}
-          <div className="flex justify-center mb-6">
-            <button
-              onClick={handleIcsDownload}
-              disabled={isIcsLoading}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="カレンダーアプリで購読できます"
-            >
-              {isIcsLoading ? (
-                <svg className="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.357-2a8.001 8.001 0 0015.357 2H15" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              )}
-              カレンダーに追加
-            </button>
-          </div>
         </div>
 
         {/* エラーメッセージ */}

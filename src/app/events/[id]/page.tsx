@@ -12,6 +12,70 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [isIcsLoading, setIsIcsLoading] = useState(false)
+
+  // ICS購読処理
+  const handleIcsDownload = async () => {
+    if (!event) return
+    
+    setIsIcsLoading(true)
+    try {
+      // 単一イベント用のICSファイルを生成
+      const icsContent = generateSingleEventIcs(event)
+      const blob = new Blob([icsContent], { type: 'text/calendar' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `fincal-${event.id}.ics`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+      alert('イベントをカレンダーに追加しました。お使いのカレンダーアプリで確認してください。')
+    } catch (error) {
+      console.error('ICSダウンロードエラー:', error)
+      alert('カレンダーへの追加に失敗しました。しばらく時間をおいてから再度お試しください。')
+    } finally {
+      setIsIcsLoading(false)
+    }
+  }
+
+  // 単一イベント用のICS生成
+  const generateSingleEventIcs = (event: Event) => {
+    const startDate = new Date(event.startAt)
+    const endDate = new Date(event.endAt)
+    
+    const formatDate = (date: Date) => {
+      return date.getFullYear().toString() +
+             (date.getMonth() + 1).toString().padStart(2, '0') +
+             date.getDate().toString().padStart(2, '0') +
+             'T' +
+             date.getHours().toString().padStart(2, '0') +
+             date.getMinutes().toString().padStart(2, '0') +
+             date.getSeconds().toString().padStart(2, '0') +
+             'Z'
+    }
+
+    return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FinCal//Event Calendar//JA
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:${event.id}@fincal.local
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${event.title.replace(/\n/g, '\\n')}
+DESCRIPTION:${(event.description || '').replace(/\n/g, '\\n')}
+LOCATION:${event.place || ''}
+URL:${event.registerUrl || ''}
+CATEGORIES:${event.type}
+STATUS:CONFIRMED
+ORGANIZER;CN=${event.organizer}:mailto:noreply@fincal.local
+END:VEVENT
+END:VCALENDAR`
+  }
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -218,22 +282,47 @@ export default function EventDetailPage() {
 
           {/* アクションボタン */}
           <div className="absolute top-6 right-6 flex space-x-3">
-            <button
-              onClick={handleShare}
-              className="w-10 h-10 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-              </svg>
-            </button>
+            {/* お気に入りボタン */}
             <button
               onClick={handleFavorite}
               className={`w-10 h-10 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200 ${
                 isFavorite ? 'text-red-500' : 'text-gray-600'
               }`}
             >
-              <svg className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`}
+                fill={isFavorite ? "currentColor" : "none"}
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+
+            {/* カレンダーに追加ボタン */}
+            <button
+              onClick={handleIcsDownload}
+              disabled={isIcsLoading}
+              className="w-10 h-10 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isIcsLoading ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.357-2a8.001 8.001 0 0015.357 2H15" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              )}
+            </button>
+
+            {/* シェアボタン */}
+            <button
+              onClick={handleShare}
+              className="w-10 h-10 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
               </svg>
             </button>
           </div>
@@ -341,42 +430,57 @@ export default function EventDetailPage() {
 
           {/* サイドバー */}
           <div className="lg:col-span-1">
-            {/* 参加費・申込 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <span className="text-2xl font-bold text-gray-900">
+            {/* 参加費・定員 */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">参加情報</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">参加費</span>
+                  <span className="text-xl font-bold text-gray-900">
                     {event.fee === 0 ? '無料' : `¥${event.fee.toLocaleString()}`}
                   </span>
-                  {event.fee > 0 && (
-                    <span className="text-sm text-gray-500 ml-1">/人</span>
-                  )}
                 </div>
                 {event.maxParticipants && (
-                  <div className="text-right">
-                    <span className="text-sm text-gray-500">最大</span>
-                    <div className="text-lg font-semibold text-gray-900">{event.maxParticipants}名</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">定員</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      {event.maxParticipants}名
+                    </span>
                   </div>
                 )}
+                {event.registerUrl && (
+                  <div className="pt-4">
+                    <a
+                      href={event.registerUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center block"
+                    >
+                      申し込みはこちら
+                    </a>
+                  </div>
+                )}
+                
+                {/* カレンダーに追加ボタン */}
+                <div className="pt-4">
+                  <button
+                    onClick={handleIcsDownload}
+                    disabled={isIcsLoading}
+                    className="w-full flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isIcsLoading ? (
+                      <svg className="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.357-2a8.001 8.001 0 0015.357 2H15" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                    自分のカレンダー追加
+                  </button>
+                </div>
               </div>
-
-              {event.registerUrl ? (
-                <a
-                  href={event.registerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-center block"
-                >
-                  申し込む
-                </a>
-              ) : (
-                <button
-                  className="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg cursor-not-allowed font-medium"
-                  disabled
-                >
-                  申込URL未設定
-                </button>
-              )}
             </div>
 
             {/* イベント情報 */}

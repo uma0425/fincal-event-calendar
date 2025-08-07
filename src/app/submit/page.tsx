@@ -26,6 +26,8 @@ export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [imageCrop, setImageCrop] = useState({ x: 0, y: 0, width: 100, height: 100 })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,6 +47,18 @@ export default function SubmitPage() {
       }
       if (!formData.organizer.trim()) {
         throw new Error('主催者は必須です')
+      }
+
+      // 日時の妥当性チェック
+      if (formData.endDate && formData.startDate > formData.endDate) {
+        throw new Error('終了日は開始日以降である必要があります')
+      }
+
+      // 終了日時が指定されている場合の時刻チェック
+      if (formData.endDate === formData.startDate && formData.endTime && formData.startTime) {
+        if (formData.startTime >= formData.endTime) {
+          throw new Error('同じ日の場合は、終了時刻は開始時刻より後である必要があります')
+        }
       }
 
       // 画像アップロード処理（簡易版 - 実際はSupabase Storageを使用）
@@ -87,46 +101,86 @@ export default function SubmitPage() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    const { name, value } = e.target
+    
+    // 開始日が変更された場合、終了日が空なら開始日と同じにする
+    if (name === 'startDate' && value && !formData.endDate) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        endDate: value
+      })
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      })
+    }
   }
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setImageFile(file)
-      
-      try {
-        // 画像をアップロード
-        const formData = new FormData()
-        formData.append('file', file)
+      await processImageFile(file)
+    }
+  }
 
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData
-        })
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(true)
+  }
 
-        if (response.ok) {
-          const result = await response.json()
-          if (result.success) {
-            // アップロードされた画像URLを設定
-            setFormData(prev => ({
-              ...prev,
-              imageUrl: result.data.url
-            }))
-            setImagePreview(result.data.url)
-          } else {
-            throw new Error(result.error || '画像のアップロードに失敗しました')
-          }
-        } else {
-          throw new Error('画像のアップロードに失敗しました')
-        }
-      } catch (error) {
-        console.error('画像アップロードエラー:', error)
-        alert('画像のアップロードに失敗しました: ' + (error instanceof Error ? error.message : 'エラーが発生しました'))
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+    
+    const files = e.dataTransfer.files
+    if (files.length > 0) {
+      const file = files[0]
+      if (file.type.startsWith('image/')) {
+        await processImageFile(file)
+      } else {
+        alert('画像ファイルのみアップロード可能です')
       }
+    }
+  }
+
+  const processImageFile = async (file: File) => {
+    setImageFile(file)
+    
+    try {
+      // 画像をアップロード
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success) {
+          // アップロードされた画像URLを設定
+          setFormData(prev => ({
+            ...prev,
+            imageUrl: result.data.url
+          }))
+          setImagePreview(result.data.url)
+        } else {
+          throw new Error(result.error || '画像のアップロードに失敗しました')
+        }
+      } else {
+        throw new Error('画像のアップロードに失敗しました')
+      }
+    } catch (error) {
+      console.error('画像アップロードエラー:', error)
+      alert('画像のアップロードに失敗しました: ' + (error instanceof Error ? error.message : 'エラーが発生しました'))
     }
   }
 
@@ -296,6 +350,7 @@ export default function SubmitPage() {
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
+                  <p className="text-xs text-gray-500 mt-1">直接入力可能です</p>
                 </div>
               </div>
 
@@ -310,6 +365,7 @@ export default function SubmitPage() {
                     name="endDate"
                     value={formData.endDate}
                     onChange={handleChange}
+                    min={formData.startDate || undefined}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
                 </div>
@@ -325,6 +381,7 @@ export default function SubmitPage() {
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
+                  <p className="text-xs text-gray-500 mt-1">直接入力可能です</p>
                 </div>
               </div>
 
@@ -468,7 +525,19 @@ export default function SubmitPage() {
                 <label htmlFor="imageFile" className="block text-sm font-medium text-gray-700 mb-2">
                   画像ファイル
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors duration-200">
+                <div className="mb-2">
+                  <p className="text-xs text-blue-600 font-medium">推奨サイズ: 16:9 (例: 1920×1080px)</p>
+                </div>
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 ${
+                    isDragOver 
+                      ? 'border-blue-400 bg-blue-50' 
+                      : 'border-gray-300 hover:border-blue-400'
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
                   <input
                     type="file"
                     id="imageFile"
@@ -481,7 +550,7 @@ export default function SubmitPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <p className="text-gray-600 font-medium">画像をアップロード</p>
-                    <p className="text-sm text-gray-500 mt-1">またはクリックしてファイルを選択</p>
+                    <p className="text-sm text-gray-500 mt-1">ドラッグ&ドロップまたはクリックしてファイルを選択</p>
                   </label>
                 </div>
               </div>
@@ -506,14 +575,58 @@ export default function SubmitPage() {
               {imagePreview && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    プレビュー
+                    プレビュー・表示範囲調整
                   </label>
                   <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
                     <img
                       src={imagePreview}
                       alt="プレビュー"
                       className="w-full h-full object-cover"
+                      style={{
+                        objectPosition: `${imageCrop.x}% ${imageCrop.y}%`
+                      }}
                     />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
+                        表示範囲を調整できます
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* 表示範囲調整コントロール */}
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">水平位置調整</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={imageCrop.x}
+                        onChange={(e) => setImageCrop(prev => ({ ...prev, x: parseInt(e.target.value) }))}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">垂直位置調整</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={imageCrop.y}
+                        onChange={(e) => setImageCrop(prev => ({ ...prev, y: parseInt(e.target.value) }))}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>左</span>
+                      <span>中央</span>
+                      <span>右</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>上</span>
+                      <span>中央</span>
+                      <span>下</span>
+                    </div>
                   </div>
                 </div>
               )}

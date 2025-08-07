@@ -88,6 +88,18 @@ export default function EditEventPage() {
     setError(null)
 
     try {
+      // 日時の妥当性チェック
+      if (formData.endDate && formData.startDate > formData.endDate) {
+        throw new Error('終了日は開始日以降である必要があります')
+      }
+
+      // 終了日時が指定されている場合の時刻チェック
+      if (formData.endDate === formData.startDate && formData.endTime && formData.startTime) {
+        if (formData.startTime >= formData.endTime) {
+          throw new Error('同じ日の場合は、終了時刻は開始時刻より後である必要があります')
+        }
+      }
+
       const response = await fetch(`/api/admin/events/${params.id}`, {
         method: 'PUT',
         headers: {
@@ -112,10 +124,21 @@ export default function EditEventPage() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    const { name, value } = e.target
+    
+    // 開始日が変更された場合、終了日が空なら開始日と同じにする
+    if (name === 'startDate' && value && !formData.endDate) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        endDate: value
+      })
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      })
+    }
   }
 
   if (loading) {
@@ -250,6 +273,7 @@ export default function EditEventPage() {
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <p className="text-xs text-gray-500 mt-1">直接入力可能です</p>
               </div>
 
               <div>
@@ -261,6 +285,7 @@ export default function EditEventPage() {
                   name="endDate"
                   value={formData.endDate}
                   onChange={handleChange}
+                  min={formData.startDate || undefined}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -276,6 +301,7 @@ export default function EditEventPage() {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <p className="text-xs text-gray-500 mt-1">直接入力可能です</p>
               </div>
             </div>
 

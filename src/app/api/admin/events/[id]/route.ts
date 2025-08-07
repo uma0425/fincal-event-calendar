@@ -194,8 +194,30 @@ export async function PUT(
     }
 
     // 日時を結合してISO文字列に変換（日本時間）
-    const startDateTime = new Date(`${body.startDate}T${body.startTime}:00+09:00`)
-    const endDateTime = new Date(`${body.endDate}T${body.endTime}:00+09:00`)
+    let startDateTime: Date
+    let endDateTime: Date
+
+    // 開始日時の処理
+    if (body.startTime) {
+      startDateTime = new Date(`${body.startDate}T${body.startTime}:00+09:00`)
+    } else {
+      // 時刻が指定されていない場合は00:00をデフォルトとする
+      startDateTime = new Date(`${body.startDate}T00:00:00+09:00`)
+    }
+
+    // 終了日時の処理
+    if (body.endDate && body.endTime) {
+      endDateTime = new Date(`${body.endDate}T${body.endTime}:00+09:00`)
+    } else if (body.endDate && !body.endTime) {
+      // 終了日のみ指定されている場合は23:59をデフォルトとする
+      endDateTime = new Date(`${body.endDate}T23:59:59+09:00`)
+    } else if (!body.endDate && body.endTime) {
+      // 終了時刻のみ指定されている場合は開始日を使用
+      endDateTime = new Date(`${body.startDate}T${body.endTime}:00+09:00`)
+    } else {
+      // 終了日時が指定されていない場合は開始日時と同じとする
+      endDateTime = new Date(startDateTime)
+    }
 
     console.log('日時変換:', { startDateTime, endDateTime })
 
