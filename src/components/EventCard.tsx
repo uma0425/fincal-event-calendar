@@ -70,7 +70,7 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
 
   return (
     <div
-      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
+      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden touch-manipulation"
       onClick={handleCardClick}
     >
       {/* 画像セクション - 16:9アスペクト比 */}
@@ -119,9 +119,9 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
       </div>
       
       {/* コンテンツセクション */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {/* タイトル */}
-        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
           {event.title}
         </h3>
         

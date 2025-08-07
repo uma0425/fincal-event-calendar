@@ -566,35 +566,52 @@ export default function HomePage() {
             <div className="flex items-center space-x-2">
               <a
                 href="/"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity touch-manipulation"
               >
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <span className="text-xl font-bold text-gray-900">FinCal</span>
+                <span className="text-lg sm:text-xl font-bold text-gray-900">FinCal</span>
               </a>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* デスクトップナビゲーション */}
+            <div className="hidden md:flex items-center space-x-4">
               <a
                 href="/favorites"
-                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+                className="text-gray-600 hover:text-blue-600 transition-colors font-medium touch-manipulation"
               >
                 お気に入り
               </a>
               <a
                 href="/submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium touch-manipulation"
               >
                 イベント投稿
               </a>
               <a
                 href="/admin"
-                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+                className="text-gray-600 hover:text-blue-600 transition-colors font-medium touch-manipulation"
               >
                 管理画面
               </a>
+            </div>
+
+            {/* モバイルメニューボタン */}
+            <div className="md:hidden">
+              <button
+                onClick={() => {
+                  // モバイルメニューの実装（将来的に追加）
+                  alert('モバイルメニューは開発中です');
+                }}
+                className="p-2 text-gray-600 hover:text-blue-600 transition-colors touch-manipulation"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -661,52 +678,56 @@ export default function HomePage() {
         )}
 
         {/* フィルター・検索セクション */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8">
           {/* 基本フィルター */}
-          <div className="flex flex-wrap items-center gap-4 mb-4">
+          <div className="space-y-4 mb-4">
             {/* 検索ボックス */}
-            <div className="flex-1 min-w-64">
+            <div className="w-full">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="イベントを検索..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                 />
-                <svg className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
             </div>
 
-            {/* カテゴリフィルター */}
-            <div className="flex items-center space-x-2">
-              {categories.map((category) => (
-                <button
-                  key={category.value}
-                  onClick={() => setSelectedCategory(category.value)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    selectedCategory === category.value
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {category.label}
-                </button>
-              ))}
+            {/* カテゴリフィルター - モバイルではスクロール可能 */}
+            <div className="overflow-x-auto">
+              <div className="flex items-center space-x-2 min-w-max pb-2">
+                {categories.map((category) => (
+                  <button
+                    key={category.value}
+                    onClick={() => setSelectedCategory(category.value)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                      selectedCategory === category.value
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* 高度なフィルター切り替えボタン */}
-            <button
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
-            >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              詳細フィルター
-            </button>
+            <div className="flex justify-center sm:justify-start">
+              <button
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-blue-600 transition-colors bg-gray-50 rounded-lg"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                {showAdvancedFilters ? 'フィルターを閉じる' : '詳細フィルター'}
+              </button>
+            </div>
           </div>
 
           {/* 高度なフィルター */}
@@ -765,8 +786,8 @@ export default function HomePage() {
         </div>
 
         {/* 結果表示 */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
             <h2 className="text-xl font-semibold text-gray-900">
               イベント一覧
             </h2>
@@ -776,30 +797,30 @@ export default function HomePage() {
           </div>
 
           {/* 表示モード切り替え */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center sm:justify-end space-x-2">
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-3 rounded-lg transition-colors ${
                 viewMode === 'list'
                   ? 'bg-blue-100 text-blue-600'
-                  : 'text-gray-400 hover:text-gray-600'
+                  : 'text-gray-400 hover:text-gray-600 bg-gray-50'
               }`}
               title="リスト表示"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-3 rounded-lg transition-colors ${
                 viewMode === 'calendar'
                   ? 'bg-blue-100 text-blue-600'
-                  : 'text-gray-400 hover:text-gray-600'
+                  : 'text-gray-400 hover:text-gray-600 bg-gray-50'
               }`}
               title="カレンダー表示"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </button>

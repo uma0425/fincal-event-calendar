@@ -100,6 +100,26 @@
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
   }
+  
+  /* タッチ操作の最適化 */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* タッチフィードバック */
+  .touch-feedback {
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+  }
+  
+  /* スワイプ操作の最適化 */
+  .swipe-container {
+    touch-action: pan-y;
+  }
+  
+  /* ピンチズームの無効化 */
+  .no-zoom {
+    touch-action: manipulation;
+  }
 }
 
 /* ダークモード対応（将来の拡張用） */

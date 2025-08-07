@@ -81,25 +81,25 @@ export default function CalendarView({ events }: CalendarViewProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* カレンダーヘッダー */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200">
         <button
           onClick={() => changeMonth('prev')}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          className="p-2 sm:p-2 hover:bg-gray-100 rounded-md transition-colors touch-manipulation"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900 text-center flex-1">
           {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月
         </h2>
         
         <button
           onClick={() => changeMonth('next')}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          className="p-2 sm:p-2 hover:bg-gray-100 rounded-md transition-colors touch-manipulation"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
@@ -108,7 +108,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
       {/* 曜日ヘッダー */}
       <div className="grid grid-cols-7 gap-px bg-gray-200">
         {['日', '月', '火', '水', '木', '金', '土'].map(day => (
-          <div key={day} className="bg-gray-50 p-2 text-center text-sm font-medium text-gray-700">
+          <div key={day} className="bg-gray-50 p-1 sm:p-2 text-center text-xs sm:text-sm font-medium text-gray-700">
             {day}
           </div>
         ))}
@@ -125,18 +125,18 @@ export default function CalendarView({ events }: CalendarViewProps) {
               key={index}
               onClick={() => handleDateClick(date)}
               className={`
-                min-h-[80px] p-2 bg-white cursor-pointer hover:bg-gray-50 transition-colors
+                min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 bg-white cursor-pointer hover:bg-gray-50 transition-colors touch-manipulation
                 ${!isCurrentMonth(date) ? 'text-gray-400' : 'text-gray-900'}
                 ${isToday(date) ? 'bg-blue-50' : ''}
                 ${isSelected(date) ? 'bg-blue-100 border-2 border-blue-500' : ''}
               `}
             >
-              <div className="text-sm font-medium mb-1">{date.getDate()}</div>
+              <div className="text-xs sm:text-sm font-medium mb-1">{date.getDate()}</div>
               
               {/* イベント表示 */}
               {hasEvents && (
-                <div className="space-y-1">
-                  {dayEvents.slice(0, 2).map(event => (
+                <div className="space-y-0.5 sm:space-y-1">
+                  {dayEvents.slice(0, 1).map(event => (
                     <div
                       key={event.id}
                       className="text-xs bg-blue-100 text-blue-800 px-1 py-0.5 rounded truncate"
@@ -145,9 +145,9 @@ export default function CalendarView({ events }: CalendarViewProps) {
                       {event.title}
                     </div>
                   ))}
-                  {dayEvents.length > 2 && (
+                  {dayEvents.length > 1 && (
                     <div className="text-xs text-gray-500">
-                      +{dayEvents.length - 2}件
+                      +{dayEvents.length - 1}件
                     </div>
                   )}
                 </div>
