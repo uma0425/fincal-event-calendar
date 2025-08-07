@@ -8,6 +8,8 @@ import { getCachedEvents } from '@/lib/cache';
 import { LoadingPage, SkeletonList } from '@/components/LoadingStates';
 import { validateSearchQuery } from '@/lib/validation';
 import { useNotification } from '@/components/NotificationSystem';
+import MobileMenu from '@/components/MobileMenu';
+import MobileMenu from '@/components/MobileMenu';
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -21,6 +23,7 @@ export default function HomePage() {
   const [selectedDateRange, setSelectedDateRange] = useState<string>('all');
   const [selectedPrefecture, setSelectedPrefecture] = useState<string>('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const { warning } = useNotification();
 
@@ -613,11 +616,9 @@ export default function HomePage() {
             {/* モバイルメニューボタン */}
             <div className="md:hidden">
               <button
-                onClick={() => {
-                  // モバイルメニューの実装（将来的に追加）
-                  alert('モバイルメニューは開発中です');
-                }}
+                onClick={() => setIsMobileMenuOpen(true)}
                 className="p-2 text-gray-600 hover:text-blue-600 transition-colors touch-manipulation"
+                aria-label="メニューを開く"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -847,6 +848,12 @@ export default function HomePage() {
         ) : (
           <CalendarView events={filteredEvents} />
         )}
+
+        {/* モバイルメニュー */}
+        <MobileMenu 
+          isOpen={isMobileMenuOpen} 
+          onClose={() => setIsMobileMenuOpen(false)} 
+        />
       </div>
     </div>
   );

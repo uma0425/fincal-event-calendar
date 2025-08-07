@@ -218,28 +218,56 @@ export default function SubmitPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-gray-900">FinCal</span>
+              <a
+                href="/"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="text-lg sm:text-xl font-bold text-gray-900">FinCal</span>
+              </a>
             </div>
-            <a
-              href="/"
-              className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
-            >
-              ホームに戻る
-            </a>
+            
+            {/* デスクトップナビゲーション */}
+            <div className="hidden md:flex items-center space-x-4">
+              <a
+                href="/favorites"
+                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+              >
+                お気に入り
+              </a>
+              <a
+                href="/admin"
+                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+              >
+                管理画面
+              </a>
+            </div>
+
+            {/* モバイルメニューボタン */}
+            <div className="md:hidden">
+              <a
+                href="/"
+                className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+                aria-label="ホームに戻る"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* タイトルセクション */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">イベントを投稿</h1>
-          <p className="text-lg text-gray-600">新しいイベントを投稿して、みんなとシェアしましょう</p>
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">イベントを投稿</h1>
+          <p className="text-base sm:text-lg text-gray-600">新しいイベントを投稿して、みんなとシェアしましょう</p>
         </div>
 
         {/* エラーメッセージ - 通知システムで代替されるため削除 */}
@@ -631,11 +659,11 @@ export default function SubmitPage() {
             </div>
 
             {/* 送信ボタン */}
-            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => window.location.href = '/'}
-                className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                 disabled={isSubmitting}
               >
                 キャンセル
@@ -643,7 +671,7 @@ export default function SubmitPage() {
               <LoadingButton
                 loading={isSubmitting}
                 disabled={isSubmitting}
-                className="px-8 py-3 font-medium"
+                className="w-full sm:w-auto px-8 py-3 font-medium"
               >
                 {isSubmitting ? '投稿中...' : 'イベントを投稿'}
               </LoadingButton>

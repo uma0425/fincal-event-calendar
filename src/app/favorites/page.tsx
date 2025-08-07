@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Event } from '@prisma/client'
 import LazyEventList from '@/components/LazyEventList'
 import { LoadingPage } from '@/components/LoadingStates'
+import MobileMenu from '@/components/MobileMenu'
 
 interface FavoriteEvent {
   id: string
@@ -17,6 +18,7 @@ export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<FavoriteEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -230,28 +232,50 @@ export default function FavoritesPage() {
       {/* ヘッダー */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                      <div className="flex justify-between items-center h-16">
+              <div className="flex items-center space-x-2">
+                <a
+                  href="/"
+                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <span className="text-lg sm:text-xl font-bold text-gray-900">FinCal</span>
+                </a>
               </div>
-              <span className="text-xl font-bold text-gray-900">FinCal</span>
+              
+              {/* デスクトップナビゲーション */}
+              <div className="hidden md:flex items-center space-x-4">
+                <a
+                  href="/submit"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  イベント投稿
+                </a>
+                <a
+                  href="/admin"
+                  className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+                >
+                  管理画面
+                </a>
+              </div>
+
+              {/* モバイルメニューボタン */}
+              <div className="md:hidden">
+                <button
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+                  aria-label="メニューを開く"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <a
-              href="/"
-              className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
-            >
-              ホームに戻る
-            </a>
-            <a
-              href="/admin"
-              className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
-            >
-              管理画面
-            </a>
-          </div>
         </div>
       </header>
 
@@ -288,6 +312,12 @@ export default function FavoritesPage() {
             }}
           />
         )}
+
+        {/* モバイルメニュー */}
+        <MobileMenu 
+          isOpen={isMobileMenuOpen} 
+          onClose={() => setIsMobileMenuOpen(false)} 
+        />
       </div>
     </div>
   )
