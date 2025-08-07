@@ -196,6 +196,9 @@ export async function POST(request: NextRequest) {
     
     // データベース接続エラーの場合はフォールバックレスポンス
     if (error instanceof Error && error.message.includes('connect')) {
+      const body = await request.json().catch(() => ({}))
+      const eventId = body.eventId || 'unknown'
+      
       return NextResponse.json({
         success: true,
         favorite: { id: 'fallback', eventId, userId: 'anonymous', createdAt: new Date().toISOString() },
