@@ -72,6 +72,10 @@ export default function HomePage() {
         
         console.log('削除APIレスポンス:', response.status);
         if (response.ok) {
+          const data = await response.json()
+          if (data.fallback) {
+            console.log('フォールバックモードで削除完了');
+          }
           setFavorites(prev => prev.filter(id => id !== eventId))
           console.log('お気に入りから削除完了');
         } else {
@@ -92,16 +96,43 @@ export default function HomePage() {
         
         console.log('追加APIレスポンス:', response.status);
         if (response.ok) {
+          const data = await response.json()
+          if (data.fallback) {
+            console.log('フォールバックモードで追加完了');
+          }
           setFavorites(prev => [...prev, eventId])
           console.log('お気に入りに追加完了');
         } else {
           const errorData = await response.text();
           console.error('追加APIエラー:', errorData);
+          
+          // 502エラーの場合はフォールバックとしてローカルで処理
+          if (response.status === 502) {
+            console.log('502エラーを検出、ローカルフォールバックを実行');
+            setFavorites(prev => [...prev, eventId])
+            console.log('ローカルフォールバックでお気に入りに追加完了');
+            return
+          }
+          
           throw new Error('お気に入りに追加に失敗しました')
         }
       }
     } catch (error) {
       console.error('お気に入り操作エラー:', error)
+      
+      // ネットワークエラーの場合はローカルフォールバック
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.log('ネットワークエラーを検出、ローカルフォールバックを実行');
+        const isFavorite = favorites.includes(eventId)
+        if (isFavorite) {
+          setFavorites(prev => prev.filter(id => id !== eventId))
+        } else {
+          setFavorites(prev => [...prev, eventId])
+        }
+        console.log('ローカルフォールバックでお気に入り操作完了');
+        return
+      }
+      
       alert('お気に入り操作に失敗しました')
     }
   }
