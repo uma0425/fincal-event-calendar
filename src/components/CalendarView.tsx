@@ -135,7 +135,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
   // イベントの場所を取得（短縮版）
   const getEventPlace = (event: Event) => {
     if (!event.place) return '';
-    return event.place.length > 10 ? event.place.substring(0, 10) + '...' : event.place;
+    return event.place.length > 8 ? event.place.substring(0, 8) + '...' : event.place;
   };
 
   // イベントのタイプカラーを取得
@@ -150,7 +150,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
     return colors[event.type] || colors['other'];
   };
 
-  // 週ビューのレンダリング
+    // 週ビューのレンダリング
   const renderWeekView = () => (
     <div className="grid grid-cols-7 gap-px bg-gray-200">
       {weekDays.map((date, index) => {
@@ -161,7 +161,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
           <div
             key={index}
             className={`
-              min-h-[120px] sm:min-h-[150px] p-2 bg-white cursor-pointer hover:bg-gray-50 transition-colors touch-manipulation
+              min-h-[140px] sm:min-h-[180px] p-2 bg-white cursor-pointer hover:bg-gray-50 transition-colors touch-manipulation
               ${isToday(date) ? 'bg-blue-50' : ''}
               ${isSelected(date) ? 'bg-blue-100 border-2 border-blue-500' : ''}
             `}
@@ -177,25 +177,29 @@ export default function CalendarView({ events }: CalendarViewProps) {
             {/* イベント表示 */}
             {hasEvents && (
               <div className="space-y-1">
-                                 {dayEvents.slice(0, 3).map(event => (
-                   <div
-                     key={event.id}
-                     onClick={(e) => handleEventClick(event, e)}
-                     className={`text-xs px-2 py-1 rounded border cursor-pointer hover:opacity-80 transition-opacity ${getEventTypeColor(event)}`}
-                     title={`${event.title} - ${formatEventTime(event)}${event.place ? ` - ${event.place}` : ''}`}
-                   >
-                     <div className="font-medium truncate">{event.title}</div>
-                     <div className="text-xs opacity-75 flex items-center justify-between">
-                       <span>{formatEventTime(event)}</span>
-                       {event.place && (
-                         <span className="text-xs opacity-60">{getEventPlace(event)}</span>
-                       )}
-                     </div>
-                   </div>
-                 ))}
-                {dayEvents.length > 3 && (
+                {dayEvents.slice(0, 2).map(event => (
+                  <div
+                    key={event.id}
+                    onClick={(e) => handleEventClick(event, e)}
+                    className={`text-xs px-2 py-1 rounded border cursor-pointer hover:opacity-80 transition-opacity ${getEventTypeColor(event)} overflow-hidden`}
+                    title={`${event.title} - ${formatEventTime(event)}${event.place ? ` - ${event.place}` : ''}`}
+                  >
+                    <div className="font-medium truncate text-xs leading-tight mb-1 max-w-full">
+                      {event.title}
+                    </div>
+                    <div className="text-xs opacity-75 leading-tight space-y-0.5">
+                      <div className="truncate">{formatEventTime(event)}</div>
+                      {event.place && (
+                        <div className="truncate text-xs opacity-60">
+                          {getEventPlace(event)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {dayEvents.length > 2 && (
                   <div className="text-xs text-gray-500 text-center">
-                    +{dayEvents.length - 3}件
+                    +{dayEvents.length - 2}件
                   </div>
                 )}
               </div>
