@@ -151,7 +151,7 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
           <span className="line-clamp-1">{event.organizer}</span>
         </div>
 
-        {/* 参加費 */}
+        {/* 参加費とアクションボタン */}
         <div className="flex items-center justify-between">
           <div className="flex items-center text-sm text-gray-600">
             <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,6 +159,17 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
             </svg>
             <span>{event.fee === 0 ? '無料' : `¥${event.fee?.toLocaleString()}`}</span>
           </div>
+          
+          {/* 詳細表示ボタン */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/events/${event.id}`);
+            }}
+            className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors opacity-0 group-hover:opacity-100"
+          >
+            詳細
+          </button>
         </div>
       </div>
     </div>
