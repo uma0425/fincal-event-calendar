@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LoadingButton } from '@/components/LoadingStates'
+import { validateAdminLogin } from '@/lib/validation'
+import { handleFormError, retryOperation } from '@/lib/errorHandling'
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('')
@@ -16,13 +18,23 @@ export default function AdminLogin() {
     setError('')
 
     try {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password })
-      })
+      // パスワードの検証
+      const validationResult = validateAdminLogin(password)
+      if (!validationResult.isValid) {
+        setError(validationResult.errors.join('\n'))
+        return
+      }
+
+      // ログインリクエスト（リトライ機能付き）
+      const response = await retryOperation(async () => {
+        return fetch('/api/admin/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ password })
+        })
+      }, 3, 1000)
 
       if (response.ok) {
         // ログイン成功 - 少し待ってからリダイレクト
@@ -34,7 +46,8 @@ export default function AdminLogin() {
         setError(data.error || 'ログインに失敗しました')
       }
     } catch (err) {
-      setError('ログインに失敗しました')
+      const errorMessage = handleFormError(err as Error, 'admin-login')
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }

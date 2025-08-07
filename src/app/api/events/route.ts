@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { EventStatus, EventType } from '@prisma/client'
+import { validateEventData, sanitizeHtml } from '@/lib/validation'
+import { DatabaseError, ValidationError, logError } from '@/lib/errorHandling'
 
 // イベント一覧取得（公開済みのみ）
 export async function GET(request: NextRequest) {
@@ -75,22 +77,27 @@ export async function POST(request: NextRequest) {
   try {
     // データベース接続チェック
     if (!prisma) {
-      return NextResponse.json(
-        { success: false, error: 'データベース接続が設定されていません。管理者にお問い合わせください。' },
-        { status: 503 }
-      )
+      throw new DatabaseError('データベース接続が設定されていません', 'DATABASE_CONNECTION_ERROR')
     }
 
     const body = await request.json()
     
     console.log('受信したデータ:', body)
     
-    // 必須フィールドの検証
-    if (!body.title || !body.description || !body.startDate || !body.organizer) {
-      return NextResponse.json(
-        { success: false, error: '必須フィールドが不足しています' },
-        { status: 400 }
-      )
+    // 入力データのサニタイズ
+    const sanitizedBody = {
+      ...body,
+      title: sanitizeHtml(body.title || ''),
+      description: sanitizeHtml(body.description || ''),
+      organizer: sanitizeHtml(body.organizer || ''),
+      place: body.place ? sanitizeHtml(body.place) : '',
+      target: body.target ? sanitizeHtml(body.target) : ''
+    }
+    
+    // 包括的なバリデーション
+    const validationResult = validateEventData(sanitizedBody)
+    if (!validationResult.isValid) {
+      throw new ValidationError('入力データに問題があります', validationResult.errors)
     }
 
     // 日時を結合してISO文字列に変換（日本時間）
@@ -98,22 +105,22 @@ export async function POST(request: NextRequest) {
     let endDateTime: Date
 
     // 開始日時の処理
-    if (body.startTime) {
-      startDateTime = new Date(`${body.startDate}T${body.startTime}:00+09:00`)
+    if (sanitizedBody.startTime) {
+      startDateTime = new Date(`${sanitizedBody.startDate}T${sanitizedBody.startTime}:00+09:00`)
     } else {
       // 時刻が指定されていない場合は00:00をデフォルトとする
-      startDateTime = new Date(`${body.startDate}T00:00:00+09:00`)
+      startDateTime = new Date(`${sanitizedBody.startDate}T00:00:00+09:00`)
     }
 
     // 終了日時の処理
-    if (body.endDate && body.endTime) {
-      endDateTime = new Date(`${body.endDate}T${body.endTime}:00+09:00`)
-    } else if (body.endDate && !body.endTime) {
+    if (sanitizedBody.endDate && sanitizedBody.endTime) {
+      endDateTime = new Date(`${sanitizedBody.endDate}T${sanitizedBody.endTime}:00+09:00`)
+    } else if (sanitizedBody.endDate && !sanitizedBody.endTime) {
       // 終了日のみ指定されている場合は23:59をデフォルトとする
-      endDateTime = new Date(`${body.endDate}T23:59:59+09:00`)
-    } else if (!body.endDate && body.endTime) {
+      endDateTime = new Date(`${sanitizedBody.endDate}T23:59:59+09:00`)
+    } else if (!sanitizedBody.endDate && sanitizedBody.endTime) {
       // 終了時刻のみ指定されている場合は開始日を使用
-      endDateTime = new Date(`${body.startDate}T${body.endTime}:00+09:00`)
+      endDateTime = new Date(`${sanitizedBody.startDate}T${sanitizedBody.endTime}:00+09:00`)
     } else {
       // 終了日時が指定されていない場合は開始日時と同じとする
       endDateTime = new Date(startDateTime)
@@ -121,24 +128,24 @@ export async function POST(request: NextRequest) {
 
     // イベントデータを作成
     const eventData = {
-      title: body.title,
-      description: body.description,
+      title: sanitizedBody.title,
+      description: sanitizedBody.description,
       startAt: startDateTime,
       endAt: endDateTime,
-      type: (body.type as EventType) || EventType.other,
-      organizer: body.organizer,
-      place: body.place || null,
-      registerUrl: body.registerUrl || null,
-      fee: parseInt(body.fee) || 0,
-      target: body.target || null,
-      imageUrl: body.imageUrl || null,
-      prefecture: body.prefecture || null,
+      type: (sanitizedBody.type as EventType) || EventType.other,
+      organizer: sanitizedBody.organizer,
+      place: sanitizedBody.place || null,
+      registerUrl: sanitizedBody.registerUrl || null,
+      fee: parseInt(sanitizedBody.fee) || 0,
+      target: sanitizedBody.target || null,
+      imageUrl: sanitizedBody.imageUrl || null,
+      prefecture: sanitizedBody.prefecture || null,
       status: EventStatus.pending,
-      maxParticipants: body.maxParticipants ? parseInt(body.maxParticipants) : null,
-      location: body.place || null
+      maxParticipants: sanitizedBody.maxParticipants ? parseInt(sanitizedBody.maxParticipants) : null,
+      location: sanitizedBody.place || null
     }
 
-    console.log('受信した画像URL:', body.imageUrl)
+    console.log('受信した画像URL:', sanitizedBody.imageUrl)
     console.log('保存する画像URL:', eventData.imageUrl)
 
     console.log('作成するイベントデータ:', eventData)
@@ -155,26 +162,26 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('イベント投稿エラー:', error)
+    logError(error as Error, { endpoint: '/api/events', method: 'POST' })
     
-    // より詳細なエラーメッセージを提供
-    let errorMessage = 'イベントの投稿に失敗しました'
-    
-    if (error instanceof Error) {
-      if (error.message.includes('DATABASE_URL')) {
-        errorMessage = 'データベース接続が設定されていません。管理者にお問い合わせください。'
-      } else if (error.message.includes('foreign key constraint')) {
-        errorMessage = 'データベース接続エラーが発生しました'
-      } else if (error.message.includes('invalid input syntax')) {
-        errorMessage = '入力データの形式が正しくありません'
-      } else if (error.message.includes('connection')) {
-        errorMessage = 'データベース接続エラーが発生しました。しばらく時間をおいてから再試行してください。'
-      } else {
-        errorMessage = error.message
-      }
+    // エラータイプに応じた適切なレスポンス
+    if (error instanceof ValidationError) {
+      return NextResponse.json(
+        { success: false, error: error.message, details: error.errors },
+        { status: 400 }
+      )
     }
     
+    if (error instanceof DatabaseError) {
+      return NextResponse.json(
+        { success: false, error: 'データベースエラーが発生しました。しばらく時間をおいてから再試行してください。' },
+        { status: 503 }
+      )
+    }
+    
+    // その他のエラー
     return NextResponse.json(
-      { success: false, error: errorMessage },
+      { success: false, error: 'イベントの投稿に失敗しました。しばらく時間をおいてから再試行してください。' },
       { status: 500 }
     )
   }

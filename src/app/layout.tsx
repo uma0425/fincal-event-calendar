@@ -5,6 +5,7 @@ import { initializeDatabase } from '@/lib/init-db'
 import { FavoriteProvider } from '@/contexts/FavoriteContext'
 import { NotificationProvider } from '@/components/NotificationSystem'
 import PWAInstaller from '@/components/PWAInstaller'
+import { setupGlobalErrorHandler } from '@/lib/errorHandling'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,6 +28,11 @@ export const metadata: Metadata = {
 // サーバーサイドでのみデータベース初期化を実行
 if (typeof window === 'undefined') {
   initializeDatabase()
+}
+
+// クライアントサイドでのみグローバルエラーハンドラーを設定
+if (typeof window !== 'undefined') {
+  setupGlobalErrorHandler()
 }
 
 export default function RootLayout({

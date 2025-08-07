@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useNotification } from '@/components/NotificationSystem'
 import { LoadingButton } from '@/components/LoadingStates'
+import { validateEventData, isValidFile, sanitizeHtml } from '@/lib/validation'
+import { handleFormError, retryOperation } from '@/lib/errorHandling'
 
 export default function SubmitPage() {
   const [formData, setFormData] = useState({
@@ -39,29 +41,27 @@ export default function SubmitPage() {
     setError(null)
     
     try {
-      // バリデーション
-      if (!formData.title.trim()) {
-        throw new Error('イベントタイトルは必須です')
-      }
-      if (!formData.description.trim()) {
-        throw new Error('イベント説明は必須です')
-      }
-      if (!formData.startDate) {
-        throw new Error('開始日は必須です')
-      }
-      if (!formData.organizer.trim()) {
-        throw new Error('主催者は必須です')
+      // 入力データのサニタイズ
+      const sanitizedData = {
+        ...formData,
+        title: sanitizeHtml(formData.title),
+        description: sanitizeHtml(formData.description),
+        organizer: sanitizeHtml(formData.organizer),
+        place: formData.place ? sanitizeHtml(formData.place) : '',
+        target: formData.target ? sanitizeHtml(formData.target) : ''
       }
 
-      // 日時の妥当性チェック
-      if (formData.endDate && formData.startDate > formData.endDate) {
-        throw new Error('終了日は開始日以降である必要があります')
+      // 包括的なバリデーション
+      const validationResult = validateEventData(sanitizedData)
+      if (!validationResult.isValid) {
+        throw new Error(validationResult.errors.join('\n'))
       }
 
-      // 終了日時が指定されている場合の時刻チェック
-      if (formData.endDate === formData.startDate && formData.endTime && formData.startTime) {
-        if (formData.startTime >= formData.endTime) {
-          throw new Error('同じ日の場合は、終了時刻は開始時刻より後である必要があります')
+      // 画像ファイルの検証
+      if (imageFile) {
+        const fileValidation = isValidFile(imageFile, 5 * 1024 * 1024, ['image/jpeg', 'image/png', 'image/webp'])
+        if (!fileValidation.isValid) {
+          throw new Error(fileValidation.errors.join('\n'))
         }
       }
 
@@ -69,20 +69,22 @@ export default function SubmitPage() {
       let imageUrl = formData.imageUrl
       if (imageFile && !imageUrl) {
         // 画像ファイルがあるがURLがない場合は、プレースホルダーを使用
-        imageUrl = `https://via.placeholder.com/800x400/2563eb/ffffff?text=${encodeURIComponent(formData.title)}`
+        imageUrl = `https://via.placeholder.com/800x400/2563eb/ffffff?text=${encodeURIComponent(sanitizedData.title)}`
       }
 
-      // フォームデータをAPIに送信
-      const response = await fetch('/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          imageUrl: imageUrl || null
-        }),
-      })
+      // フォームデータをAPIに送信（リトライ機能付き）
+      const response = await retryOperation(async () => {
+        return fetch('/api/events', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...sanitizedData,
+            imageUrl: imageUrl || null
+          }),
+        })
+      }, 3, 1000)
       
       const result = await response.json()
       
@@ -98,7 +100,7 @@ export default function SubmitPage() {
       }
     } catch (error) {
       console.error('投稿エラー:', error)
-      const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
+      const errorMessage = handleFormError(error as Error, 'event-submission')
       showError('投稿エラー', errorMessage, 8000)
       setError(errorMessage)
     } finally {

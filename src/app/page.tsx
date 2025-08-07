@@ -6,6 +6,8 @@ import LazyEventList from '@/components/LazyEventList';
 import CalendarView from '@/components/CalendarView';
 import { getCachedEvents } from '@/lib/cache';
 import { LoadingPage, SkeletonList } from '@/components/LoadingStates';
+import { validateSearchQuery } from '@/lib/validation';
+import { useNotification } from '@/components/NotificationSystem';
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -19,6 +21,8 @@ export default function HomePage() {
   const [selectedDateRange, setSelectedDateRange] = useState<string>('all');
   const [selectedPrefecture, setSelectedPrefecture] = useState<string>('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  
+  const { warning } = useNotification();
 
   // カテゴリをメモ化
   const categories = useMemo(() => {
@@ -57,6 +61,21 @@ export default function HomePage() {
     { value: '15', label: '新潟県' },
   ], []);
 
+  // 検索クエリの検証
+  const searchValidation = useMemo(() => {
+    if (searchQuery) {
+      return validateSearchQuery(searchQuery)
+    }
+    return { isValid: true, errors: [] }
+  }, [searchQuery])
+
+  // 検索クエリに問題がある場合は警告を表示
+  useEffect(() => {
+    if (!searchValidation.isValid) {
+      warning('検索クエリに問題があります', searchValidation.errors.join(', '), 5000)
+    }
+  }, [searchValidation, warning])
+
   // フィルタリングされたイベント
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
@@ -65,8 +84,8 @@ export default function HomePage() {
         return false;
       }
 
-      // 検索クエリフィルター
-      if (searchQuery) {
+      // 検索クエリフィルター（検証済みの場合のみ）
+      if (searchQuery && searchValidation.isValid) {
         const query = searchQuery.toLowerCase();
         const searchableText = [
           event.title,
