@@ -733,7 +733,7 @@ export default function HomePage() {
           {/* 高度なフィルター */}
           {showAdvancedFilters && (
             <div className="border-t border-gray-200 pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 {/* 日付範囲フィルター */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">日付範囲</label>
@@ -765,21 +765,21 @@ export default function HomePage() {
                     ))}
                   </select>
                 </div>
-              </div>
 
-              {/* フィルターリセットボタン */}
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory('all');
-                    setSelectedDateRange('all');
-                    setSelectedPrefecture('all');
-                  }}
-                  className="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors"
-                >
-                  フィルターをリセット
-                </button>
+                {/* フィルターリセットボタン */}
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedCategory('all');
+                      setSelectedDateRange('all');
+                      setSelectedPrefecture('all');
+                    }}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors"
+                  >
+                    フィルターをリセット
+                  </button>
+                </div>
               </div>
             </div>
           )}
