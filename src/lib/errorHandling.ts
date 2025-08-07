@@ -1,6 +1,7 @@
 // エラーハンドリングライブラリ
 
 export interface AppError {
+  name: string
   code: string
   message: string
   details?: any
@@ -117,7 +118,7 @@ export const ERROR_MESSAGES = {
 // エラーをユーザーフレンドリーなメッセージに変換
 export function getUserFriendlyMessage(error: Error | AppError): string {
   // AppErrorの場合
-  if ('code' in error && error.code) {
+  if (isAppError(error)) {
     return ERROR_MESSAGES[error.code as keyof typeof ERROR_MESSAGES] || error.message
   }
 
@@ -171,9 +172,9 @@ export function getUserFriendlyMessage(error: Error | AppError): string {
 export function logError(error: Error | AppError, context?: any): void {
   const errorLog = {
     timestamp: new Date().toISOString(),
-    name: error.name,
+    name: 'name' in error ? error.name : 'UnknownError',
     message: error.message,
-    stack: error.stack,
+    stack: 'stack' in error ? error.stack : undefined,
     context,
     userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
     url: typeof window !== 'undefined' ? window.location.href : 'server'
@@ -328,4 +329,13 @@ export async function retryOperation<T>(
   }
 
   throw lastError!
+}
+
+// 型ガード関数
+export function isAppError(error: Error | AppError): error is AppError {
+  return 'code' in error && typeof error.code === 'string'
+}
+
+export function isError(error: Error | AppError): error is Error {
+  return 'name' in error && 'stack' in error
 } 
