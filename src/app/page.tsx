@@ -326,7 +326,7 @@ export default function HomePage() {
     const isFavorite = favorites.includes(event.id);
 
     return (
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
         {/* イベント画像 */}
         <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
           {event.imageUrl ? (
@@ -359,7 +359,10 @@ export default function HomePage() {
 
           {/* お気に入りボタン */}
           <button
-            onClick={() => handleFavorite(event.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleFavorite(event.id);
+            }}
             className="absolute top-3 right-3 w-8 h-8 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 hover:scale-110 transition-all duration-200 z-10 cursor-pointer shadow-md"
             title={isFavorite ? "お気に入りから削除" : "お気に入りに追加"}
           >
@@ -377,7 +380,7 @@ export default function HomePage() {
         {/* イベント情報 */}
         <div className="p-4">
           {/* タイトル */}
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
             {event.title}
           </h3>
 
@@ -432,9 +435,10 @@ export default function HomePage() {
               )}
             </div>
             
-            {/* 参加ボタン */}
+            {/* 詳細ボタン */}
             <a
               href={`/events/${event.id}`}
+              onClick={(e) => e.stopPropagation()}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
             >
               詳細を見る
@@ -450,9 +454,15 @@ export default function HomePage() {
             </div>
           )}
         </div>
+
+        {/* カード全体のクリックイベント */}
+        <div 
+          className="absolute inset-0 z-0"
+          onClick={() => window.location.href = `/events/${event.id}`}
+        />
       </div>
-    );
-  };
+    )
+  }
 
   if (loading) {
     return (
@@ -473,20 +483,20 @@ export default function HomePage() {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* ロゴ */}
-            <div className="flex items-center">
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
+              <a
+                href="/"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+              >
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <span className="text-xl font-bold text-gray-900">FinCal</span>
-              </div>
+              </a>
             </div>
-
-            {/* ナビゲーション */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <div className="flex items-center space-x-4">
               <a
                 href="/favorites"
                 className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
@@ -499,21 +509,6 @@ export default function HomePage() {
               >
                 イベント投稿
               </a>
-              <a
-                href="/admin"
-                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
-              >
-                管理画面
-              </a>
-            </nav>
-
-            {/* モバイルメニュー */}
-            <div className="md:hidden">
-              <button className="text-gray-600 hover:text-blue-600 transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>

@@ -149,19 +149,32 @@ export default function EventDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-gray-900">FinCal</span>
+              <a
+                href="/"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="text-xl font-bold text-gray-900">FinCal</span>
+              </a>
             </div>
-            <a
-              href="/"
-              className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
-            >
-              ホームに戻る
-            </a>
+            <div className="flex items-center space-x-4">
+              <a
+                href="/favorites"
+                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+              >
+                お気に入り
+              </a>
+              <a
+                href="/submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                イベント投稿
+              </a>
+            </div>
           </div>
         </div>
       </header>

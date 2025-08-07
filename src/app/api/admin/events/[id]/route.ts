@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 import { EventStatus, EventType } from '@prisma/client'
+
+// Prismaクライアントの初期化をより安全に行う
+let prisma: PrismaClient
+
+try {
+  prisma = new PrismaClient()
+} catch (error) {
+  console.error('Prismaクライアント初期化エラー:', error)
+  prisma = null as any
+}
 
 // 管理者用：イベントステータス更新
 export async function PATCH(
@@ -8,13 +18,15 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    // データベース接続チェック
     if (!prisma) {
       return NextResponse.json(
-        { success: false, error: 'データベース接続が設定されていません' },
+        { success: false, error: 'データベース接続が利用できません' },
         { status: 503 }
       )
     }
+
+    // データベース接続テスト
+    await prisma.$connect()
 
     const { id } = params
     const body = await request.json()
@@ -74,6 +86,10 @@ export async function PATCH(
       { success: false, error: errorMessage },
       { status: 500 }
     )
+  } finally {
+    if (prisma) {
+      await prisma.$disconnect()
+    }
   }
 }
 
@@ -83,13 +99,15 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // データベース接続チェック
     if (!prisma) {
       return NextResponse.json(
-        { success: false, error: 'データベース接続が設定されていません' },
+        { success: false, error: 'データベース接続が利用できません' },
         { status: 503 }
       )
     }
+
+    // データベース接続テスト
+    await prisma.$connect()
 
     const { id } = params
 
@@ -135,8 +153,12 @@ export async function DELETE(
       { success: false, error: errorMessage },
       { status: 500 }
     )
+  } finally {
+    if (prisma) {
+      await prisma.$disconnect()
+    }
   }
-} 
+}
 
 // 管理者用：イベント更新
 export async function PUT(
@@ -144,16 +166,20 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    // データベース接続チェック
     if (!prisma) {
       return NextResponse.json(
-        { success: false, error: 'データベース接続が設定されていません' },
+        { success: false, error: 'データベース接続が利用できません' },
         { status: 503 }
       )
     }
 
+    // データベース接続テスト
+    await prisma.$connect()
+
     const { id } = params
     const body = await request.json()
+
+    console.log('イベント更新リクエスト:', { id, body })
 
     // イベントの存在確認
     const existingEvent = await prisma.event.findUnique({
@@ -170,6 +196,8 @@ export async function PUT(
     // 日時を結合してISO文字列に変換（日本時間）
     const startDateTime = new Date(`${body.startDate}T${body.startTime}:00+09:00`)
     const endDateTime = new Date(`${body.endDate}T${body.endTime}:00+09:00`)
+
+    console.log('日時変換:', { startDateTime, endDateTime })
 
     // イベントデータを更新
     const updatedEvent = await prisma.event.update({
@@ -193,7 +221,7 @@ export async function PUT(
       }
     })
 
-    console.log(`イベント更新: ${id}`)
+    console.log(`イベント更新完了: ${id}`)
 
     return NextResponse.json({
       success: true,
@@ -221,5 +249,9 @@ export async function PUT(
       { success: false, error: errorMessage },
       { status: 500 }
     )
+  } finally {
+    if (prisma) {
+      await prisma.$disconnect()
+    }
   }
 } 
