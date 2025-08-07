@@ -5,6 +5,7 @@ import { Event } from '@prisma/client';
 import LazyEventList from '@/components/LazyEventList';
 import CalendarView from '@/components/CalendarView';
 import { getCachedEvents } from '@/lib/cache';
+import { LoadingPage, SkeletonList } from '@/components/LoadingStates';
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -545,16 +546,7 @@ export default function HomePage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="flex justify-center items-center h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 font-medium">イベントを読み込み中...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingPage message="イベントを読み込み中..." showProgress={true} />;
   }
 
   return (
@@ -827,11 +819,7 @@ export default function HomePage() {
 
         {/* イベント表示 */}
         {viewMode === 'list' ? (
-          <Suspense fallback={
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            </div>
-          }>
+          <Suspense fallback={<SkeletonList count={8} />}>
             <LazyEventList
               events={filteredEvents}
               renderEvent={renderEvent}

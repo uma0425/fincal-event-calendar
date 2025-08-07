@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { initializeDatabase } from '@/lib/init-db'
 import { FavoriteProvider } from '@/contexts/FavoriteContext'
+import { NotificationProvider } from '@/components/NotificationSystem'
 import PWAInstaller from '@/components/PWAInstaller'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -36,10 +37,12 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={inter.className}>
-        <FavoriteProvider>
-          {children}
-          <PWAInstaller />
-        </FavoriteProvider>
+        <NotificationProvider>
+          <FavoriteProvider>
+            {children}
+            <PWAInstaller />
+          </FavoriteProvider>
+        </NotificationProvider>
       </body>
     </html>
   )

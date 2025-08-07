@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { useNotification } from '@/components/NotificationSystem'
+import { LoadingButton } from '@/components/LoadingStates'
 
 export default function SubmitPage() {
   const [formData, setFormData] = useState({
@@ -28,6 +30,8 @@ export default function SubmitPage() {
   const [success, setSuccess] = useState(false)
   const [isDragOver, setIsDragOver] = useState(false)
   const [imageCrop, setImageCrop] = useState({ x: 0, y: 0, width: 100, height: 100 })
+  
+  const { success: showSuccess, error: showError } = useNotification()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,6 +87,7 @@ export default function SubmitPage() {
       const result = await response.json()
       
       if (response.ok && result.success) {
+        showSuccess('投稿完了！', 'イベントが正常に投稿されました。承認後に公開されます。', 5000)
         setSuccess(true)
         // 3秒後にホームページにリダイレクト
         setTimeout(() => {
@@ -94,6 +99,7 @@ export default function SubmitPage() {
     } catch (error) {
       console.error('投稿エラー:', error)
       const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
+      showError('投稿エラー', errorMessage, 8000)
       setError(errorMessage)
     } finally {
       setIsSubmitting(false)
@@ -234,17 +240,7 @@ export default function SubmitPage() {
           <p className="text-lg text-gray-600">新しいイベントを投稿して、みんなとシェアしましょう</p>
         </div>
 
-        {/* エラーメッセージ */}
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <span className="text-red-800 font-medium">{error}</span>
-            </div>
-          </div>
-        )}
+        {/* エラーメッセージ - 通知システムで代替されるため削除 */}
 
         {/* フォーム */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -642,23 +638,13 @@ export default function SubmitPage() {
               >
                 キャンセル
               </button>
-              <button
-                type="submit"
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
+              <LoadingButton
+                loading={isSubmitting}
                 disabled={isSubmitting}
+                className="px-8 py-3 font-medium"
               >
-                {isSubmitting ? (
-                  <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    投稿中...
-                  </div>
-                ) : (
-                  'イベントを投稿'
-                )}
-              </button>
+                {isSubmitting ? '投稿中...' : 'イベントを投稿'}
+              </LoadingButton>
             </div>
           </form>
         </div>
