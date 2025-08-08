@@ -9,7 +9,6 @@ import { LoadingPage, SkeletonList } from '@/components/LoadingStates';
 import { validateSearchQuery } from '@/lib/validation';
 import { useNotification } from '@/components/NotificationSystem';
 import MobileMenu from '@/components/MobileMenu';
-import MobileMenu from '@/components/MobileMenu';
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([])

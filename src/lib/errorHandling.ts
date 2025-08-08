@@ -217,23 +217,23 @@ export async function handleApiResponse(response: Response): Promise<any> {
       switch (response.status) {
         case 400:
           errorMessage = 'リクエストが正しくありません'
-          errorCode = ERROR_CODES.INVALID_INPUT
+          errorCode = ERROR_CODES.API_ERROR
           break
         case 401:
           errorMessage = '認証が必要です'
-          errorCode = ERROR_CODES.AUTHENTICATION_ERROR
+          errorCode = ERROR_CODES.API_ERROR
           break
         case 403:
           errorMessage = 'アクセスが拒否されました'
-          errorCode = ERROR_CODES.AUTHORIZATION_ERROR
+          errorCode = ERROR_CODES.API_ERROR
           break
         case 404:
           errorMessage = 'リソースが見つかりません'
-          errorCode = ERROR_CODES.RECORD_NOT_FOUND
+          errorCode = ERROR_CODES.API_ERROR
           break
         case 500:
           errorMessage = 'サーバーエラーが発生しました'
-          errorCode = ERROR_CODES.INTERNAL_SERVER_ERROR
+          errorCode = ERROR_CODES.API_ERROR
           break
         default:
           errorMessage = `HTTP ${response.status}: ${response.statusText}`
