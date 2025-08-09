@@ -233,25 +233,25 @@ export default function FavoritesPage() {
       {/* ヘッダー */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                      <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-2">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
                 <Logo size="md" href="/" />
               </div>
               
               {/* デスクトップナビゲーション */}
               <div className="hidden md:flex items-center space-x-4">
-                <a
+            <a
                   href="/submit"
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
+            >
                   イベント投稿
-                </a>
-                <a
-                  href="/admin"
-                  className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
-                >
-                  管理画面
-                </a>
+            </a>
+            <a
+              href="/admin"
+              className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+            >
+              管理画面
+            </a>
               </div>
 
               {/* モバイルメニューボタン */}
@@ -266,7 +266,7 @@ export default function FavoritesPage() {
                   </svg>
                 </button>
               </div>
-            </div>
+          </div>
         </div>
       </header>
 

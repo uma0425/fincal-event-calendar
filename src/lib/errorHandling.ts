@@ -172,9 +172,9 @@ export function getUserFriendlyMessage(error: Error | AppError): string {
 export function logError(error: Error | AppError, context?: any): void {
   const errorLog = {
     timestamp: new Date().toISOString(),
-    name: 'name' in error ? error.name : 'UnknownError',
+    name: isAppError(error) ? error.name : (error as Error).name || 'UnknownError',
     message: error.message,
-    stack: 'stack' in error ? error.stack : undefined,
+    stack: isError(error) ? error.stack : undefined,
     context,
     userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
     url: typeof window !== 'undefined' ? window.location.href : 'server'
