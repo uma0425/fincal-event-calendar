@@ -5,6 +5,7 @@ import { useNotification } from '@/components/NotificationSystem'
 import { LoadingButton } from '@/components/LoadingStates'
 import { validateEventData, isValidFile, sanitizeHtml } from '@/lib/validation'
 import { handleFormError, retryOperation } from '@/lib/errorHandling'
+import Logo from '@/components/Logo'
 
 export default function SubmitPage() {
   const [formData, setFormData] = useState({
@@ -218,17 +219,7 @@ export default function SubmitPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <a
-                href="/"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
-              >
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <span className="text-lg sm:text-xl font-bold text-gray-900">FinCal</span>
-              </a>
+              <Logo size="md" href="/" />
             </div>
             
             {/* デスクトップナビゲーション */}

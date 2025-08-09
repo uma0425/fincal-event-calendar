@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { LoadingButton } from '@/components/LoadingStates'
 import { validateAdminLogin } from '@/lib/validation'
 import { handleFormError, retryOperation } from '@/lib/errorHandling'
+import Logo from '@/components/Logo'
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('')
@@ -57,7 +58,9 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="text-3xl font-bold text-blue-600 mb-2">FinCal</div>
+          <div className="flex justify-center mb-4">
+            <Logo size="lg" showText={true} />
+          </div>
           <h2 className="text-2xl font-semibold text-gray-900">管理者ログイン</h2>
           <p className="text-gray-600 mt-2">管理者パスワードを入力してください</p>
         </div>

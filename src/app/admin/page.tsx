@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Event, EventStatus } from '@prisma/client'
+import Logo from '@/components/Logo'
 
 export default function AdminDashboard() {
   const [pendingEvents, setPendingEvents] = useState<Event[]>([])
@@ -181,7 +182,8 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <div className="text-2xl font-bold text-blue-600">FinCal 管理者</div>
+              <Logo size="md" showText={true} />
+              <span className="text-lg font-semibold text-gray-700">管理者</span>
               <nav className="hidden md:flex space-x-8">
                 <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">ホーム</a>
                 <a href="/admin" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">管理者</a>
