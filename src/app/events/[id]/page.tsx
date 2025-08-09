@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Event } from '@prisma/client'
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 
 export default function EventDetailPage() {
   const params = useParams()
@@ -508,6 +509,19 @@ END:VCALENDAR`
               </div>
             </div>
           </div>
+        </div>
+
+        {/* モバイル固定CTAボタン */}
+        <div className="fixed bottom-6 right-6 z-50 sm:hidden">
+          <Link
+            href="/submit"
+            className="flex items-center justify-center w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            title="イベントを投稿"
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </Link>
         </div>
       </div>
     </div>
