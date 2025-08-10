@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   title: 'FinCal - イベントカレンダー',
   description: 'イベントの投稿・管理・共有ができるカレンダーアプリケーション',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/logo.png',
+  },
   formatDetection: {
     telephone: false
   }
