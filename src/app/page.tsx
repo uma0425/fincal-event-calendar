@@ -499,11 +499,11 @@ export default function HomePage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* タイトルセクション */}
-        <div className="text-center mb-8 pt-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-8 pt-24 animate-fade-in-up">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 animate-fade-in-scale">
             FinCal — みんなでつくる、みんなのイベント表
           </h1>
-          <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
+          <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             誰でもサクッと投稿・シェアできるオープンカレンダーです。勉強会から交流会まで、最新の会計・ファイナンス系イベントがひと目でわかります。
           </p>
         </div>
@@ -558,7 +558,7 @@ export default function HomePage() {
         )}
 
         {/* フィルター・検索セクション */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8 mt-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8 mt-8 animate-fade-in-up hover-lift" style={{ animationDelay: '0.3s' }}>
           {/* 基本フィルター */}
           <div className="space-y-4 mb-4">
             {/* 検索ボックス */}
@@ -734,7 +734,7 @@ export default function HomePage() {
         <div className="fixed bottom-6 right-6 z-50">
           <Link
             href="/submit"
-            className="flex flex-col items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            className="flex flex-col items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 animate-bounce hover-scale"
             title="イベントを投稿"
           >
             <svg className="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

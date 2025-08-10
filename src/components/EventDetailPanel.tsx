@@ -159,12 +159,12 @@ END:VCALENDAR`
         onClick={onClose}
       />
       
-      {/* パネル */}
-      <div 
-        className={`fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
+                        {/* パネル */}
+                  <div 
+                    className={`fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out animate-slide-in-right ${
+                      isOpen ? 'translate-x-0' : 'translate-x-full'
+                    }`}
+                  >
         {/* ヘッダー */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <button

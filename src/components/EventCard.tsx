@@ -70,7 +70,7 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
 
   return (
     <div
-      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden touch-manipulation"
+      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden touch-manipulation animate-fade-in-scale hover-lift"
       onClick={handleCardClick}
     >
       {/* 画像セクション - 16:9アスペクト比 */}

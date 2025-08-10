@@ -64,44 +64,6 @@ export default function PWAInstaller() {
     setShowInstallButton(false);
   };
 
-  // インストールボタンが表示されない場合は何も表示しない
-  if (!showInstallButton || isInstalled) {
-    return null;
-  }
-
-  return (
-    <div className="fixed bottom-4 left-4 right-4 z-50">
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm mx-auto">
-        <div className="flex items-center space-x-3">
-          <div className="flex-shrink-0">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900">
-              FinCalをインストール
-            </p>
-            <p className="text-xs text-gray-500">
-              ホーム画面に追加して、より快適にご利用ください
-            </p>
-          </div>
-          <div className="flex-shrink-0 space-x-2">
-            <button
-              onClick={handleInstallClick}
-              className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              インストール
-            </button>
-            <button
-              onClick={() => setShowInstallButton(false)}
-              className="text-gray-400 hover:text-gray-600 text-sm"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // PWAインストール表示を削除
+  return null;
 } 
