@@ -12,7 +12,7 @@ import { useNotification } from '@/components/NotificationSystem';
 import MobileMenu from '@/components/MobileMenu';
 import Logo from '@/components/Logo';
 import EventDetailPanel from '@/components/EventDetailPanel';
-import EventCardV2 from '@/components/EventCardV2';
+import EventCardOptimized from '@/components/EventCardOptimized';
 import FilterChips from '@/components/FilterChips';
 import TitleLogo from '@/components/TitleLogo';
 
@@ -543,7 +543,7 @@ export default function HomePage() {
 
   const renderEvent = (event: Event) => {
     return (
-      <EventCardV2 
+      <EventCardOptimized 
         event={event} 
         onClick={() => handleEventClick(event)}
       />
