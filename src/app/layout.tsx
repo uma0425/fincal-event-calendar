@@ -14,9 +14,12 @@ export const metadata: Metadata = {
   description: 'イベントの投稿・管理・共有ができるカレンダーアプリケーション',
   manifest: '/manifest.json',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
+    ],
     shortcut: '/favicon.ico',
-    apple: '/logo.png',
+    apple: '/favicon.png',
   },
   formatDetection: {
     telephone: false
