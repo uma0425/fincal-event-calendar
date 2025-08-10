@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { updateEventFavoriteCount } from '@/lib/analytics'
 
 // Prismaクライアントの初期化をより安全に行う
 let prisma: PrismaClient
@@ -185,6 +186,9 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // 統計情報を更新
+    await updateEventFavoriteCount(eventId, true)
+
     console.log('お気に入り追加完了:', favorite);
 
     return NextResponse.json({
@@ -262,6 +266,11 @@ export async function DELETE(request: NextRequest) {
         eventId: eventId
       }
     })
+
+    // 統計情報を更新
+    if (deletedFavorite.count > 0) {
+      await updateEventFavoriteCount(eventId, false)
+    }
 
     console.log('削除されたお気に入り数:', deletedFavorite.count);
 

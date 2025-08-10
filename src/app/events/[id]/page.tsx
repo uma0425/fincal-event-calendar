@@ -106,8 +106,28 @@ END:VCALENDAR`
 
     if (eventId) {
       fetchEvent()
+      // 閲覧記録を送信
+      recordEventView()
     }
   }, [eventId])
+
+  // 閲覧記録を送信
+  const recordEventView = async () => {
+    try {
+      await fetch('/api/analytics/view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventId,
+          userAgent: navigator.userAgent,
+        }),
+      })
+    } catch (error) {
+      console.error('閲覧記録エラー:', error)
+    }
+  }
 
   // お気に入り状態を取得
   useEffect(() => {

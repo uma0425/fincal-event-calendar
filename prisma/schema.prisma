@@ -64,10 +64,16 @@ model Event {
   updatedAt     DateTime    @updatedAt
   maxParticipants Int?
   location      String?
+  
+  // 統計情報
+  viewCount     Int         @default(0)
+  favoriteCount Int         @default(0)
+  shareCount    Int         @default(0)
 
   // Relations（オプショナル）
   user User? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
   favorites Favorite[]
+  eventViews EventView[]
 
   @@map("events")
 }
@@ -84,4 +90,54 @@ model Favorite {
 
   @@unique([userId, eventId])
   @@map("favorites")
+}
+
+// イベント閲覧履歴
+model EventView {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String?  // 匿名ユーザーも許可
+  ipAddress String?
+  userAgent String?
+  viewedAt  DateTime @default(now())
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("event_views")
+}
+
+// 統計データ（日次集計）
+model DailyStats {
+  id            String   @id @default(cuid())
+  date          DateTime @unique
+  totalEvents   Int      @default(0)
+  totalViews    Int      @default(0)
+  totalFavorites Int     @default(0)
+  totalShares   Int      @default(0)
+  newEvents     Int      @default(0)
+  activeUsers   Int      @default(0)
+  
+  // カテゴリ別統計
+  seminarCount  Int      @default(0)
+  webinarCount  Int      @default(0)
+  meetupCount   Int      @default(0)
+  workshopCount Int      @default(0)
+  otherCount    Int      @default(0)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("daily_stats")
+}
+
+// 人気キーワード
+model PopularKeyword {
+  id        String   @id @default(cuid())
+  keyword   String
+  count     Int      @default(0)
+  date      DateTime @default(now())
+  
+  @@unique([keyword, date])
+  @@map("popular_keywords")
 } 

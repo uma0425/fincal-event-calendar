@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Event, EventStatus } from '@prisma/client'
 import Logo from '@/components/Logo'
+import AnalyticsDashboard from '@/components/AnalyticsDashboard'
 
 export default function AdminDashboard() {
   const [pendingEvents, setPendingEvents] = useState<Event[]>([])
@@ -208,6 +209,9 @@ export default function AdminDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 分析ダッシュボード */}
+        <AnalyticsDashboard className="mb-8" />
+        
         {/* 統計情報 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
