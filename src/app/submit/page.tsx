@@ -6,6 +6,7 @@ import { LoadingButton } from '@/components/LoadingStates'
 import { validateEventData, isValidFile, sanitizeHtml } from '@/lib/validation'
 import { handleFormError, retryOperation } from '@/lib/errorHandling'
 import Logo from '@/components/Logo'
+import RichTextEditor from '@/components/RichTextEditor'
 
 export default function SubmitPage() {
   const [formData, setFormData] = useState({
@@ -297,16 +298,15 @@ export default function SubmitPage() {
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
                   イベント説明 <span className="text-red-500">*</span>
                 </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  required
-                  rows={4}
+                <RichTextEditor
                   value={formData.description}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="イベントの詳細な説明を入力してください"
+                  onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                  placeholder="イベントの詳細な説明を入力してください（太字、斜体、リストなどの書式設定が可能です）"
+                  className="w-full"
                 />
+                <p className="text-xs text-gray-500 mt-2">
+                  💡 太字、斜体、下線、リスト、リンクなどの書式設定ができます
+                </p>
               </div>
 
               {/* イベントタイプ */}
