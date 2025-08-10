@@ -12,9 +12,9 @@ export default function TitleLogo({ className = '' }: TitleLogoProps) {
       <Image
         src="/fincal_title.svg"
         alt="FinCal — みんなでつくる、みんなのイベント表"
-        width={800}
-        height={450}
-        className="w-full max-w-4xl h-auto object-contain"
+        width={1600}
+        height={180}
+        className="w-full max-w-5xl h-auto object-contain"
         priority
       />
     </div>

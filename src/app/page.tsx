@@ -567,7 +567,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
           {/* タイトルセクション */}
           <div className="text-center mb-8">
-            <div className="h-32 bg-gray-200 rounded-lg mb-4 animate-pulse max-w-4xl mx-auto"></div>
+            <div className="h-20 bg-gray-200 rounded-lg mb-4 animate-pulse max-w-5xl mx-auto"></div>
             <div className="h-6 bg-gray-200 rounded-lg mb-6 max-w-3xl mx-auto animate-pulse"></div>
           </div>
 
