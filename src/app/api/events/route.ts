@@ -47,9 +47,15 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // 画像URLが空の場合はデフォルト画像を設定
+    const processedEvents = events.map(event => ({
+      ...event,
+      imageUrl: event.imageUrl || `https://via.placeholder.com/800x400/2563eb/ffffff?text=${encodeURIComponent(event.title)}`
+    }))
+
     return NextResponse.json({
       success: true,
-      events: events
+      events: processedEvents
     })
   } catch (error) {
     console.error('イベント取得エラー:', error)

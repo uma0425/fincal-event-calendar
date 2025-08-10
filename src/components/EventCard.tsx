@@ -75,43 +75,40 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
     >
       {/* 画像セクション - 16:9アスペクト比 */}
       <div className="relative">
-        {event.imageUrl ? (
-          <div className="relative w-full h-0 pb-[56.25%] overflow-hidden">
-            {event.imageUrl.startsWith('data:') ? (
-              // data URLの場合は通常のimgタグを使用
-              <img
-                src={event.imageUrl}
-                alt={event.title}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            ) : (
-              // 外部URLの場合は通常のimgタグを使用（Next.js Imageの制限を回避）
-              <img
-                src={event.imageUrl}
-                alt={event.title}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                onError={(e) => {
-                  // 画像読み込みエラー時の処理
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  target.parentElement!.innerHTML = `
-                    <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                      <svg class="w-16 h-16 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  `;
-                }}
-              />
-            )}
-          </div>
-        ) : (
-          <div className="w-full h-0 pb-[56.25%] bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center relative">
-            <svg className="absolute inset-0 m-auto w-16 h-16 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-        )}
+        <div className="relative w-full h-0 pb-[56.25%] overflow-hidden">
+          {(() => {
+            // デバッグ用：画像URLの状況をログ出力
+            console.log('Event imageUrl:', event.id, event.imageUrl);
+            return event.imageUrl && event.imageUrl.trim() !== '';
+          })() ? (
+            <img
+              src={event.imageUrl}
+              alt={event.title}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                // 画像読み込みエラー時の処理
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                // プレースホルダーを表示
+                const placeholder = document.createElement('div');
+                placeholder.className = 'absolute inset-0 w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center';
+                placeholder.innerHTML = `
+                  <svg class="w-16 h-16 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                `;
+                target.parentElement!.appendChild(placeholder);
+              }}
+            />
+          ) : (
+            // 画像URLがない場合のプレースホルダー
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+              <svg className="w-16 h-16 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          )}
+        </div>
         
         {/* お気に入りボタン */}
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
