@@ -85,15 +85,23 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             ) : (
-              // 外部URLの場合はNext.jsのImageコンポーネントを使用
-              <Image
+              // 外部URLの場合は通常のimgタグを使用（Next.js Imageの制限を回避）
+              <img
                 src={event.imageUrl}
                 alt={event.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                priority={false}
-                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  // 画像読み込みエラー時の処理
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.parentElement!.innerHTML = `
+                    <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+                      <svg class="w-16 h-16 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  `;
+                }}
               />
             )}
           </div>
@@ -110,9 +118,9 @@ const EventCard = memo(function EventCard({ event, onClick }: EventCardProps) {
           <FavoriteButton eventId={event.id} />
         </div>
 
-        {/* カテゴリバッジ */}
-        <div className="absolute top-3 left-3">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${typeColor}`}>
+        {/* カテゴリバッジ - 右下に移動 */}
+        <div className="absolute bottom-3 right-3">
+          <span className={`px-2 py-1 text-xs font-medium rounded-full ${typeColor} shadow-sm`}>
             {typeLabel}
           </span>
         </div>

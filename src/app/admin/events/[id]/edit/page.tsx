@@ -141,6 +141,41 @@ export default function EditEventPage() {
     }
   }
 
+  const handleToggleVisibility = async () => {
+    if (!event) return
+    
+    setSaving(true)
+    setError(null)
+
+    try {
+      const newStatus = formData.status === 'published' ? 'pending' : 'published'
+      
+      const response = await fetch(`/api/admin/events/${event.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          status: newStatus
+        })
+      })
+
+      if (response.ok) {
+        setFormData(prev => ({ ...prev, status: newStatus }))
+        alert(newStatus === 'published' ? 'イベントを公開しました' : 'イベントを非公開にしました')
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'ステータスの更新に失敗しました')
+      }
+    } catch (err) {
+      console.error('ステータス更新エラー:', err)
+      setError(err instanceof Error ? err.message : 'ステータスの更新に失敗しました')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -431,21 +466,38 @@ export default function EditEventPage() {
             )}
 
             {/* ボタン */}
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => router.push('/admin')}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                キャンセル
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                {saving ? '更新中...' : '更新'}
-              </button>
+            <div className="flex justify-between items-center">
+              <div className="flex space-x-4">
+                <button
+                  type="button"
+                  onClick={handleToggleVisibility}
+                  disabled={saving}
+                  className={`px-6 py-2 rounded-lg transition-colors disabled:opacity-50 ${
+                    formData.status === 'published' 
+                      ? 'bg-red-600 text-white hover:bg-red-700' 
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                >
+                  {saving ? '処理中...' : formData.status === 'published' ? '非公開にする' : '公開する'}
+                </button>
+              </div>
+              
+              <div className="flex space-x-4">
+                <button
+                  type="button"
+                  onClick={() => router.push('/admin')}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  {saving ? '更新中...' : '更新'}
+                </button>
+              </div>
             </div>
           </form>
         </div>

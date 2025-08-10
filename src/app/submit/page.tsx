@@ -102,7 +102,28 @@ export default function SubmitPage() {
       }
     } catch (error) {
       console.error('投稿エラー:', error)
-      const errorMessage = handleFormError(error as Error, 'event-submission')
+      let errorMessage = '投稿に失敗しました'
+      
+      // エラーメッセージの詳細化
+      if (error instanceof Error) {
+        if (error.message.includes('イベント説明は5000文字以下')) {
+          errorMessage = 'イベント説明が長すぎます。5000文字以内で入力してください。'
+        } else if (error.message.includes('イベントタイトルは100文字以下')) {
+          errorMessage = 'イベントタイトルが長すぎます。100文字以内で入力してください。'
+        } else if (error.message.includes('必須です')) {
+          errorMessage = '必須項目が入力されていません。すべての必須項目を入力してください。'
+        } else if (error.message.includes('日付')) {
+          errorMessage = '日付の形式が正しくありません。正しい日付を入力してください。'
+        } else if (error.message.includes('時刻')) {
+          errorMessage = '時刻の形式が正しくありません。正しい時刻を入力してください。'
+        } else if (error.message.includes('URL')) {
+          errorMessage = 'URLの形式が正しくありません。正しいURLを入力してください。'
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
+      const detailedErrorMessage = handleFormError(error as Error, 'event-submission')
       showError('投稿エラー', errorMessage, 8000)
       setError(errorMessage)
     } finally {
