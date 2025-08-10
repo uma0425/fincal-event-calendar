@@ -25,6 +25,21 @@ export default function FavoritesPage() {
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
+        // ローカルストレージからお気に入りを取得（高速化）
+        const cachedFavorites = localStorage.getItem('favorites');
+        if (cachedFavorites) {
+          try {
+            const parsed = JSON.parse(cachedFavorites);
+            if (parsed && parsed.length > 0) {
+              setFavorites(parsed);
+              setLoading(false);
+            }
+          } catch (e) {
+            // キャッシュが破損している場合は無視
+          }
+        }
+        
+        // バックグラウンドで最新データを取得
         const response = await fetch('/api/favorites')
         
         if (response.ok) {
@@ -40,6 +55,9 @@ export default function FavoritesPage() {
             }
           }))
           setFavorites(processedFavorites)
+          
+          // キャッシュに保存
+          localStorage.setItem('favorites', JSON.stringify(processedFavorites));
         } else {
           throw new Error('お気に入りの取得に失敗しました')
         }
@@ -315,12 +333,13 @@ export default function FavoritesPage() {
         <div className="fixed bottom-6 right-6 z-50 sm:hidden">
           <Link
             href="/submit"
-            className="flex items-center justify-center w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            className="flex flex-col items-center justify-center w-20 h-20 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
             title="イベントを投稿"
           >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
+            <span className="text-xs font-medium">投稿</span>
           </Link>
         </div>
       </div>
