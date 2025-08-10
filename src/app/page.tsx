@@ -153,11 +153,16 @@ export default function HomePage() {
         const response = await fetch('/api/favorites')
         if (response.ok) {
           const data = await response.json()
-          const favoriteIds = data.favorites.map((fav: any) => fav.eventId)
+          // 安全にお気に入りIDを抽出
+          const favoriteIds = data.favorites
+            ?.filter((fav: any) => fav && fav.eventId)
+            ?.map((fav: any) => fav.eventId) || []
           setFavorites(favoriteIds)
         }
       } catch (error) {
         console.error('お気に入り取得エラー:', error)
+        // エラー時は空配列を設定
+        setFavorites([])
       }
     }
 
@@ -258,15 +263,24 @@ export default function HomePage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         // キャッシュからイベントを取得（高速化）
         const cachedEvents = await getCachedEvents();
         if (cachedEvents && cachedEvents.length > 0) {
+          console.log('キャッシュからイベントを読み込み:', cachedEvents.length, '件');
           setEvents(cachedEvents);
           setLoading(false);
         }
         
         // バックグラウンドで最新データを取得
-        const response = await fetch('/api/events');
+        const response = await fetch('/api/events', {
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
         
         if (response.status === 503) {
           // データベース接続エラーの場合、サンプルデータを表示
@@ -446,7 +460,53 @@ export default function HomePage() {
   };
 
   if (loading) {
-    return <LoadingPage message="イベントを読み込み中..." showProgress={true} />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        {/* ヘッダー */}
+        <header className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b z-30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center space-x-2">
+                <Logo size="md" href="/" />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+          {/* タイトルセクション */}
+          <div className="text-center mb-8">
+            <div className="h-12 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
+            <div className="h-6 bg-gray-200 rounded-lg mb-6 max-w-3xl mx-auto animate-pulse"></div>
+          </div>
+
+          {/* フィルターセクション */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8">
+            <div className="h-10 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
+            <div className="flex space-x-2 mb-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-8 bg-gray-200 rounded-lg w-20 animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+
+          {/* イベントグリッド */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse">
+                <div className="h-48 bg-gray-200"></div>
+                <div className="p-4">
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
