@@ -11,6 +11,7 @@ import { validateSearchQuery } from '@/lib/validation';
 import { useNotification } from '@/components/NotificationSystem';
 import MobileMenu from '@/components/MobileMenu';
 import Logo from '@/components/Logo';
+import EventDetailPanel from '@/components/EventDetailPanel';
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -25,6 +26,8 @@ export default function HomePage() {
   const [selectedPrefecture, setSelectedPrefecture] = useState<string>('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
   
   const { warning } = useNotification();
 
@@ -240,6 +243,16 @@ export default function HomePage() {
     }
   }
 
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsDetailPanelOpen(true);
+  }
+
+  const handleCloseDetailPanel = () => {
+    setIsDetailPanelOpen(false);
+    setSelectedEvent(null);
+  }
+
   // イベント取得処理
   useEffect(() => {
     const fetchEvents = async () => {
@@ -426,7 +439,10 @@ export default function HomePage() {
     const isFavorite = favorites.includes(event.id);
 
     return (
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
+      <div 
+        className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
+        onClick={() => handleEventClick(event)}
+      >
         {/* イベント画像 */}
         <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
           {event.imageUrl ? (
@@ -835,6 +851,13 @@ export default function HomePage() {
         ) : (
           <CalendarView events={filteredEvents} />
         )}
+
+        {/* イベント詳細パネル */}
+        <EventDetailPanel
+          event={selectedEvent}
+          isOpen={isDetailPanelOpen}
+          onClose={handleCloseDetailPanel}
+        />
 
         {/* モバイルメニュー */}
         <MobileMenu 
