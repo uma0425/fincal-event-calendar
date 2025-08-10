@@ -432,6 +432,22 @@ export default function SubmitPage() {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="会場名またはオンライン"
                   />
+                  {/* Google Maps プレビュー */}
+                  {formData.place && (
+                    <div className="mt-3">
+                      <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-200">
+                        <iframe
+                          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&q=${encodeURIComponent(formData.place)}`}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

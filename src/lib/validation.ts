@@ -163,7 +163,7 @@ export function validateEventData(data: EventValidationData): ValidationResult {
   const descriptionResult = validateField(data.description, {
     required: true,
     minLength: 10,
-    maxLength: 2000
+    maxLength: 5000
   }, 'イベント説明')
   errors.push(...descriptionResult.errors)
 

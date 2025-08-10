@@ -15,6 +15,7 @@ export default function EventDetailPanel({ event, isOpen, onClose }: EventDetail
   const router = useRouter()
   const [isFavorite, setIsFavorite] = useState(false)
   const [isIcsLoading, setIsIcsLoading] = useState(false)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
 
   // お気に入り状態を取得
   useEffect(() => {
@@ -255,16 +256,30 @@ END:VCALENDAR`
 
             {/* 場所 */}
             {event.place && (
-              <div className="flex items-center space-x-3 mb-6">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <div>
-                  <div className="font-medium text-gray-900">{event.place}</div>
-                  {event.prefecture && (
-                    <div className="text-sm text-gray-600">{event.prefecture}</div>
-                  )}
+              <div className="mb-6">
+                <div className="flex items-center space-x-3 mb-3">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <div>
+                    <div className="font-medium text-gray-900">{event.place}</div>
+                    {event.prefecture && (
+                      <div className="text-sm text-gray-600">{event.prefecture}</div>
+                    )}
+                  </div>
+                </div>
+                {/* Google Maps */}
+                <div className="w-full h-48 rounded-lg overflow-hidden">
+                  <iframe
+                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&q=${encodeURIComponent(event.place)}`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
                 </div>
               </div>
             )}
@@ -273,10 +288,22 @@ END:VCALENDAR`
             {event.description && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">イベントについて</h3>
-                <div 
-                  className="text-gray-700 leading-relaxed prose prose-sm max-w-none bg-gray-50 p-4 rounded-lg"
-                  dangerouslySetInnerHTML={{ __html: event.description }}
-                />
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div 
+                    className={`text-gray-700 leading-relaxed prose prose-sm max-w-none ${
+                      !isDescriptionExpanded ? 'line-clamp-3' : ''
+                    }`}
+                    dangerouslySetInnerHTML={{ __html: event.description }}
+                  />
+                  {event.description.length > 200 && (
+                    <button
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                      className="mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                    >
+                      {isDescriptionExpanded ? 'Show less' : 'Read more'}
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
