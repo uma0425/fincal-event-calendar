@@ -14,6 +14,7 @@ import Logo from '@/components/Logo';
 import EventDetailPanel from '@/components/EventDetailPanel';
 import EventCardV2 from '@/components/EventCardV2';
 import FilterChips from '@/components/FilterChips';
+import TitleLogo from '@/components/TitleLogo';
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -562,7 +563,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
           {/* タイトルセクション */}
           <div className="text-center mb-8">
-            <div className="h-12 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
+            <div className="h-32 bg-gray-200 rounded-lg mb-4 animate-pulse max-w-4xl mx-auto"></div>
             <div className="h-6 bg-gray-200 rounded-lg mb-6 max-w-3xl mx-auto animate-pulse"></div>
           </div>
 
@@ -646,9 +647,9 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* タイトルセクション */}
         <div className="text-center mb-8 pt-24 animate-fade-in-up">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 animate-fade-in-scale">
-            FinCal — みんなでつくる、みんなのイベント表
-          </h1>
+          <div className="mb-6 animate-fade-in-scale">
+            <TitleLogo />
+          </div>
           <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             誰でもサクッと投稿・シェアできるオープンカレンダーです。勉強会から交流会まで、最新の会計・ファイナンス系イベントがひと目でわかります。
           </p>
