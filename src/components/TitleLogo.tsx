@@ -8,7 +8,7 @@ export default function TitleLogo({ className = '' }: TitleLogoProps) {
   return (
     <div className={`text-center ${className}`}>
       {/* メインタイトル（一行） */}
-      <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-gray-900 animate-fade-in-up">
+      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 text-gray-900 animate-fade-in-up">
         <span className="inline-block transform hover:scale-105 transition-transform duration-300">
           FinCal — みんなでつくる、みんなのイベント表
         </span>
