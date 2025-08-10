@@ -269,6 +269,17 @@ END:VCALENDAR`
               </div>
             )}
 
+            {/* イベント説明 */}
+            {event.description && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">イベントについて</h3>
+                <div 
+                  className="text-gray-700 leading-relaxed prose prose-sm max-w-none bg-gray-50 p-4 rounded-lg"
+                  dangerouslySetInnerHTML={{ __html: event.description }}
+                />
+              </div>
+            )}
+
             {/* 参加登録 */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">参加登録</h3>

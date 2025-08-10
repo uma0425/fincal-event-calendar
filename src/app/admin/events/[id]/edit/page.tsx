@@ -45,7 +45,7 @@ export default function EditEventPage() {
       const response = await fetch(`/api/events/${params.id}`)
       if (response.ok) {
         const data = await response.json()
-        const eventData = data.data
+        const eventData = data.event
         
         setEvent(eventData)
         

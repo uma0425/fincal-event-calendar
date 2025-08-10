@@ -13,16 +13,17 @@ export const metadata: Metadata = {
   title: 'FinCal - イベントカレンダー',
   description: 'イベントの投稿・管理・共有ができるカレンダーアプリケーション',
   manifest: '/manifest.json',
-  themeColor: '#2563eb',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'FinCal'
-  },
   formatDetection: {
     telephone: false
   }
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#2563eb'
 }
 
 // サーバーサイドでのみデータベース初期化を実行

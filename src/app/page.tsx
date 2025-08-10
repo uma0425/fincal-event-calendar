@@ -452,7 +452,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* ヘッダー */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
@@ -558,7 +558,7 @@ export default function HomePage() {
         )}
 
         {/* フィルター・検索セクション */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8 mt-8">
           {/* 基本フィルター */}
           <div className="space-y-4 mb-4">
             {/* 検索ボックス */}
