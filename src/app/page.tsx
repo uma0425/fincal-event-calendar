@@ -567,8 +567,13 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
           {/* タイトルセクション */}
           <div className="text-center mb-8">
-            <div className="h-20 bg-gray-200 rounded-lg mb-4 animate-pulse max-w-5xl mx-auto"></div>
-            <div className="h-6 bg-gray-200 rounded-lg mb-6 max-w-3xl mx-auto animate-pulse"></div>
+            <div className="h-16 md:h-20 lg:h-24 bg-gray-200 rounded-lg mb-4 animate-pulse max-w-2xl mx-auto"></div>
+            <div className="h-6 md:h-8 lg:h-10 bg-gray-200 rounded-lg mb-6 max-w-3xl mx-auto animate-pulse"></div>
+            <div className="flex justify-center items-center mt-6 space-x-2">
+              <div className="w-8 h-1 bg-gray-200 rounded-full animate-pulse"></div>
+              <div className="w-4 h-1 bg-gray-200 rounded-full animate-pulse"></div>
+              <div className="w-8 h-1 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
           </div>
 
           {/* フィルターセクション */}
