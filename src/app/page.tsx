@@ -396,7 +396,10 @@ export default function HomePage() {
               location: '東京会館',
               createdAt: new Date(),
               updatedAt: new Date(),
-              createdBy: null
+              createdBy: null,
+              viewCount: 150,
+              favoriteCount: 25,
+              shareCount: 8
             },
             {
               id: 'sample-2',
@@ -417,7 +420,10 @@ export default function HomePage() {
               location: '東京国際フォーラム',
               createdAt: new Date(),
               updatedAt: new Date(),
-              createdBy: null
+              createdBy: null,
+              viewCount: 320,
+              favoriteCount: 45,
+              shareCount: 12
             },
             {
               id: 'sample-3',
@@ -438,7 +444,10 @@ export default function HomePage() {
               location: '大阪ビジネスパーク',
               createdAt: new Date(),
               updatedAt: new Date(),
-              createdBy: null
+              createdBy: null,
+              viewCount: 85,
+              favoriteCount: 18,
+              shareCount: 5
             }
           ];
           setEvents(sampleEvents);
@@ -469,7 +478,10 @@ export default function HomePage() {
                 location: '東京会館',
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                createdBy: null
+                createdBy: null,
+                viewCount: 150,
+                favoriteCount: 25,
+                shareCount: 8
               },
               {
                 id: 'sample-2',
@@ -490,7 +502,10 @@ export default function HomePage() {
                 location: '東京国際フォーラム',
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                createdBy: null
+                createdBy: null,
+                viewCount: 320,
+                favoriteCount: 45,
+                shareCount: 12
               },
               {
                 id: 'sample-3',
@@ -511,7 +526,10 @@ export default function HomePage() {
                 location: '大阪ビジネスパーク',
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                createdBy: null
+                createdBy: null,
+                viewCount: 85,
+                favoriteCount: 18,
+                shareCount: 5
               }
             ];
             setEvents(sampleEvents);
