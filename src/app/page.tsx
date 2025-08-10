@@ -29,6 +29,8 @@ export default function HomePage() {
   const [selectedPrefectures, setSelectedPrefectures] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'date' | 'newest' | 'popular'>('date');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showDateFilters, setShowDateFilters] = useState(false);
+  const [showPrefectureFilters, setShowPrefectureFilters] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
@@ -318,6 +320,8 @@ export default function HomePage() {
     setSelectedDateRanges([]);
     setSelectedPrefectures([]);
     setSearchQuery('');
+    setShowDateFilters(false);
+    setShowPrefectureFilters(false);
   };
 
   // アクティブフィルターの取得
@@ -763,7 +767,7 @@ export default function HomePage() {
 
           {/* フィルター */}
           <div className="space-y-4">
-            {/* カテゴリフィルター */}
+            {/* カテゴリフィルター - 常に表示 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">カテゴリ</label>
               <div className="flex flex-wrap gap-2">
@@ -783,45 +787,91 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 日付範囲フィルター */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">日付範囲</label>
-              <div className="flex flex-wrap gap-2">
-                {dateRanges.filter(date => date.value !== 'all').map((dateRange) => (
-                  <button
-                    key={dateRange.value}
-                    onClick={() => toggleDateRange(dateRange.value)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      selectedDateRanges.includes(dateRange.value)
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {dateRange.label}
-                  </button>
-                ))}
-              </div>
+            {/* 詳細フィルター切り替えボタン */}
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+              <button
+                onClick={() => setShowDateFilters(!showDateFilters)}
+                className={`flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  showDateFilters || selectedDateRanges.length > 0
+                    ? 'bg-green-100 text-green-700 border border-green-200'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                日付範囲
+                {selectedDateRanges.length > 0 && (
+                  <span className="ml-1 bg-green-600 text-white text-xs rounded-full px-1.5 py-0.5">
+                    {selectedDateRanges.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setShowPrefectureFilters(!showPrefectureFilters)}
+                className={`flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  showPrefectureFilters || selectedPrefectures.length > 0
+                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                地域
+                {selectedPrefectures.length > 0 && (
+                  <span className="ml-1 bg-purple-600 text-white text-xs rounded-full px-1.5 py-0.5">
+                    {selectedPrefectures.length}
+                  </span>
+                )}
+              </button>
             </div>
 
-            {/* 都道府県フィルター */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">地域</label>
-              <div className="flex flex-wrap gap-2">
-                {prefectures.filter(pref => pref.value !== 'all').map((prefecture) => (
-                  <button
-                    key={prefecture.value}
-                    onClick={() => togglePrefecture(prefecture.value)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      selectedPrefectures.includes(prefecture.value)
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {prefecture.label}
-                  </button>
-                ))}
+            {/* 日付範囲フィルター - 条件付き表示 */}
+            {showDateFilters && (
+              <div className="pt-2 border-t border-gray-100">
+                <label className="block text-sm font-medium text-gray-700 mb-2">日付範囲</label>
+                <div className="flex flex-wrap gap-2">
+                  {dateRanges.filter(date => date.value !== 'all').map((dateRange) => (
+                    <button
+                      key={dateRange.value}
+                      onClick={() => toggleDateRange(dateRange.value)}
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        selectedDateRanges.includes(dateRange.value)
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {dateRange.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* 都道府県フィルター - 条件付き表示 */}
+            {showPrefectureFilters && (
+              <div className="pt-2 border-t border-gray-100">
+                <label className="block text-sm font-medium text-gray-700 mb-2">地域</label>
+                <div className="flex flex-wrap gap-2">
+                  {prefectures.filter(pref => pref.value !== 'all').map((prefecture) => (
+                    <button
+                      key={prefecture.value}
+                      onClick={() => togglePrefecture(prefecture.value)}
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        selectedPrefectures.includes(prefecture.value)
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {prefecture.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
