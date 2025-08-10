@@ -12,7 +12,8 @@ import { useNotification } from '@/components/NotificationSystem';
 import MobileMenu from '@/components/MobileMenu';
 import Logo from '@/components/Logo';
 import EventDetailPanel from '@/components/EventDetailPanel';
-import EventCard from '@/components/EventCard';
+import EventCardV2 from '@/components/EventCardV2';
+import FilterChips from '@/components/FilterChips';
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -21,10 +22,11 @@ export default function HomePage() {
   const [debugInfo, setDebugInfo] = useState<any>(null)
   const [favorites, setFavorites] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedDateRange, setSelectedDateRange] = useState<string>('all');
-  const [selectedPrefecture, setSelectedPrefecture] = useState<string>('all');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedDateRanges, setSelectedDateRanges] = useState<string[]>([]);
+  const [selectedPrefectures, setSelectedPrefectures] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<'date' | 'newest' | 'popular'>('date');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -86,9 +88,9 @@ export default function HomePage() {
 
   // フィルタリングされたイベント
   const filteredEvents = useMemo(() => {
-    return events.filter(event => {
-      // カテゴリフィルター
-      if (selectedCategory !== 'all' && event.type !== selectedCategory) {
+    let filtered = events.filter(event => {
+      // カテゴリフィルター（マルチセレクト OR）
+      if (selectedCategories.length > 0 && !selectedCategories.includes(event.type)) {
         return false;
       }
 
@@ -108,43 +110,69 @@ export default function HomePage() {
         }
       }
 
-      // 日付範囲フィルター
-      if (selectedDateRange !== 'all') {
+      // 日付範囲フィルター（マルチセレクト OR）
+      if (selectedDateRanges.length > 0) {
         const now = new Date();
         const eventDate = new Date(event.startAt);
+        let dateMatches = false;
         
-        switch (selectedDateRange) {
-          case 'today':
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-            if (eventDate < today || eventDate >= tomorrow) return false;
+        for (const dateRange of selectedDateRanges) {
+          let matches = false;
+          switch (dateRange) {
+            case 'today':
+              const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+              const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+              matches = eventDate >= today && eventDate < tomorrow;
+              break;
+            case 'week':
+              const weekStart = new Date(now.getTime() - now.getDay() * 24 * 60 * 60 * 1000);
+              const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+              matches = eventDate >= weekStart && eventDate < weekEnd;
+              break;
+            case 'month':
+              const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+              const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+              matches = eventDate >= monthStart && eventDate < monthEnd;
+              break;
+            case 'next-month':
+              const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+              const nextMonthEnd = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+              matches = eventDate >= nextMonthStart && eventDate < nextMonthEnd;
+              break;
+          }
+          if (matches) {
+            dateMatches = true;
             break;
-          case 'week':
-            const weekStart = new Date(now.getTime() - now.getDay() * 24 * 60 * 60 * 1000);
-            const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-            if (eventDate < weekStart || eventDate >= weekEnd) return false;
-            break;
-          case 'month':
-            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-            if (eventDate < monthStart || eventDate >= monthEnd) return false;
-            break;
-          case 'next-month':
-            const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-            const nextMonthEnd = new Date(now.getFullYear(), now.getMonth() + 2, 1);
-            if (eventDate < nextMonthStart || eventDate >= nextMonthEnd) return false;
-            break;
+          }
         }
+        if (!dateMatches) return false;
       }
 
-      // 都道府県フィルター
-      if (selectedPrefecture !== 'all' && event.prefecture !== selectedPrefecture) {
+      // 都道府県フィルター（マルチセレクト OR）
+      if (selectedPrefectures.length > 0 && !selectedPrefectures.includes(event.prefecture || '')) {
         return false;
       }
 
       return true;
     });
-  }, [events, selectedCategory, searchQuery, selectedDateRange, selectedPrefecture]);
+
+    // ソート機能
+    const sortedEvents = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'date':
+          return new Date(a.startAt).getTime() - new Date(b.startAt).getTime();
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'popular':
+          // 仮の実装：作成日でソート（実際のデータに応じて調整）
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        default:
+          return 0;
+      }
+    });
+
+    return sortedEvents;
+  }, [events, selectedCategories, selectedDateRanges, selectedPrefectures, searchQuery, searchValidation.isValid, sortBy]);
 
   // お気に入り状態を取得
   useEffect(() => {
@@ -258,6 +286,64 @@ export default function HomePage() {
     setIsDetailPanelOpen(false);
     setSelectedEvent(null);
   }
+
+  // フィルター操作関数
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const toggleDateRange = (dateRange: string) => {
+    setSelectedDateRanges(prev => 
+      prev.includes(dateRange) 
+        ? prev.filter(d => d !== dateRange)
+        : [...prev, dateRange]
+    );
+  };
+
+  const togglePrefecture = (prefecture: string) => {
+    setSelectedPrefectures(prev => 
+      prev.includes(prefecture) 
+        ? prev.filter(p => p !== prefecture)
+        : [...prev, prefecture]
+    );
+  };
+
+  const clearAllFilters = () => {
+    setSelectedCategories([]);
+    setSelectedDateRanges([]);
+    setSelectedPrefectures([]);
+    setSearchQuery('');
+  };
+
+  // アクティブフィルターの取得
+  const activeFilters = useMemo(() => {
+    const filters: Array<{ type: string; value: string; label: string }> = [];
+    
+    selectedCategories.forEach(cat => {
+      const label = categories.find(c => c.value === cat)?.label || cat;
+      filters.push({ type: 'category', value: cat, label });
+    });
+    
+    selectedDateRanges.forEach(date => {
+      const label = dateRanges.find(d => d.value === date)?.label || date;
+      filters.push({ type: 'date', value: date, label });
+    });
+    
+    selectedPrefectures.forEach(pref => {
+      const label = prefectures.find(p => p.value === pref)?.label || pref;
+      filters.push({ type: 'prefecture', value: pref, label });
+    });
+    
+    if (searchQuery) {
+      filters.push({ type: 'search', value: searchQuery, label: `検索: ${searchQuery}` });
+    }
+    
+    return filters;
+  }, [selectedCategories, selectedDateRanges, selectedPrefectures, searchQuery, categories, dateRanges, prefectures]);
 
   // イベント取得処理
   useEffect(() => {
@@ -452,7 +538,7 @@ export default function HomePage() {
 
   const renderEvent = (event: Event) => {
     return (
-      <EventCard 
+      <EventCardV2 
         event={event} 
         onClick={() => handleEventClick(event)}
       />
@@ -617,12 +703,34 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* フィルター・検索セクション */}
+        {/* アクティブフィルターチップ */}
+        <FilterChips
+          filters={activeFilters}
+          onRemove={(type, value) => {
+            switch (type) {
+              case 'category':
+                setSelectedCategories(prev => prev.filter(c => c !== value));
+                break;
+              case 'date':
+                setSelectedDateRanges(prev => prev.filter(d => d !== value));
+                break;
+              case 'prefecture':
+                setSelectedPrefectures(prev => prev.filter(p => p !== value));
+                break;
+              case 'search':
+                setSearchQuery('');
+                break;
+            }
+          }}
+          onClearAll={clearAllFilters}
+        />
+
+        {/* フィルター・検索・ソートセクション */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8 mt-8 animate-fade-in-up hover-lift" style={{ animationDelay: '0.3s' }}>
-          {/* 基本フィルター */}
-          <div className="space-y-4 mb-4">
+          {/* 検索とソート */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-6 mb-6">
             {/* 検索ボックス */}
-            <div className="w-full">
+            <div className="flex-1">
               <div className="relative">
                 <input
                   type="text"
@@ -637,15 +745,33 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* カテゴリフィルターと詳細フィルターボタン - モバイルではスクロール可能 */}
-            <div className="overflow-x-auto">
-              <div className="flex items-center space-x-2 min-w-max pb-2">
-                {categories.map((category) => (
+            {/* ソート選択 */}
+            <div className="flex items-center space-x-4">
+              <label className="text-sm font-medium text-gray-700">並び替え:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'date' | 'newest' | 'popular')}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="date">開催が近い順</option>
+                <option value="newest">新着順</option>
+                <option value="popular">人気順</option>
+              </select>
+            </div>
+          </div>
+
+          {/* フィルター */}
+          <div className="space-y-4">
+            {/* カテゴリフィルター */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">カテゴリ</label>
+              <div className="flex flex-wrap gap-2">
+                {categories.filter(cat => cat.value !== 'all').map((category) => (
                   <button
                     key={category.value}
-                    onClick={() => setSelectedCategory(category.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                      selectedCategory === category.value
+                    onClick={() => toggleCategory(category.value)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      selectedCategories.includes(category.value)
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
@@ -653,114 +779,94 @@ export default function HomePage() {
                     {category.label}
                   </button>
                 ))}
-                
-                {/* 高度なフィルター切り替えボタン */}
-                <button
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-blue-600 transition-colors bg-gray-50 rounded-lg whitespace-nowrap"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                  </svg>
-                  {showAdvancedFilters ? 'フィルターを閉じる' : '詳細フィルター'}
-                </button>
+              </div>
+            </div>
+
+            {/* 日付範囲フィルター */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">日付範囲</label>
+              <div className="flex flex-wrap gap-2">
+                {dateRanges.filter(date => date.value !== 'all').map((dateRange) => (
+                  <button
+                    key={dateRange.value}
+                    onClick={() => toggleDateRange(dateRange.value)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      selectedDateRanges.includes(dateRange.value)
+                        ? 'bg-green-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {dateRange.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 都道府県フィルター */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">地域</label>
+              <div className="flex flex-wrap gap-2">
+                {prefectures.filter(pref => pref.value !== 'all').map((prefecture) => (
+                  <button
+                    key={prefecture.value}
+                    onClick={() => togglePrefecture(prefecture.value)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      selectedPrefectures.includes(prefecture.value)
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {prefecture.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
-
-          {/* 高度なフィルター */}
-          {showAdvancedFilters && (
-            <div className="border-t border-gray-200 pt-4">
-              <div className="space-y-4">
-                {/* 日付範囲フィルター */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">日付範囲</label>
-                  <select
-                    value={selectedDateRange}
-                    onChange={(e) => setSelectedDateRange(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {dateRanges.map((range) => (
-                      <option key={range.value} value={range.value}>
-                        {range.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* 都道府県フィルター */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">地域</label>
-                  <select
-                    value={selectedPrefecture}
-                    onChange={(e) => setSelectedPrefecture(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {prefectures.map((prefecture) => (
-                      <option key={prefecture.value} value={prefecture.value}>
-                        {prefecture.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* フィルターリセットボタン */}
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => {
-                      setSearchQuery('');
-                      setSelectedCategory('all');
-                      setSelectedDateRange('all');
-                      setSelectedPrefecture('all');
-                    }}
-                    className="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors"
-                  >
-                    フィルターをリセット
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* 結果表示 */}
+        {/* 結果ヘッダー */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
-          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              イベント一覧
-            </h2>
-            <span className="text-sm text-gray-600">
+          <div className="flex items-center space-x-4">
+            <h2 className="text-2xl font-bold text-gray-900">
               {filteredEvents.length}件のイベント
-            </span>
+            </h2>
+            {activeFilters.length > 0 && (
+              <button
+                onClick={clearAllFilters}
+                className="px-3 py-1 text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-gray-200"
+              >
+                条件クリア
+              </button>
+            )}
           </div>
 
           {/* 表示モード切り替え */}
-          <div className="flex items-center justify-center sm:justify-end space-x-2">
+          <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('list')}
-              className={`p-3 rounded-lg transition-colors ${
+              className={`flex items-center px-4 py-2 rounded-md transition-all duration-200 font-medium ${
                 viewMode === 'list'
-                  ? 'bg-blue-100 text-blue-600'
-                  : 'text-gray-400 hover:text-gray-600 bg-gray-50'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
-              title="リスト表示"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
+              一覧
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`p-3 rounded-lg transition-colors ${
+              className={`flex items-center px-4 py-2 rounded-md transition-all duration-200 font-medium ${
                 viewMode === 'calendar'
-                  ? 'bg-blue-100 text-blue-600'
-                  : 'text-gray-400 hover:text-gray-600 bg-gray-50'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
-              title="カレンダー表示"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
+              カレンダー
             </button>
           </div>
         </div>
