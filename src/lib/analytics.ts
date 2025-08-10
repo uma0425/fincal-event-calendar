@@ -18,6 +18,9 @@ export interface AnalyticsData {
     viewCount: number;
     favoriteCount: number;
     shareCount: number;
+    type: EventType;
+    startAt: Date;
+    organizer: string;
   }>;
   monthlyStats: Array<{
     month: string;

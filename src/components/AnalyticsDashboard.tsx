@@ -3,6 +3,17 @@
 import { useState, useEffect } from 'react';
 import { AnalyticsData } from '@/lib/analytics';
 
+interface PopularEvent {
+  id: string;
+  title: string;
+  viewCount: number;
+  favoriteCount: number;
+  shareCount: number;
+  type: string;
+  startAt: string;
+  organizer: string;
+}
+
 interface AnalyticsDashboardProps {
   className?: string;
 }
@@ -139,7 +150,7 @@ export default function AnalyticsDashboard({ className = '' }: AnalyticsDashboar
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">人気イベント TOP 5</h3>
         <div className="space-y-3">
-          {analyticsData.popularEvents.slice(0, 5).map((event, index) => (
+          {(analyticsData.popularEvents as PopularEvent[]).slice(0, 5).map((event, index) => (
             <div key={event.id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">
