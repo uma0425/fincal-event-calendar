@@ -269,18 +269,32 @@ END:VCALENDAR`
                     )}
                   </div>
                 </div>
-                {/* Google Maps */}
-                <div className="w-full h-48 rounded-lg overflow-hidden">
-                  <iframe
-                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&q=${encodeURIComponent(event.place)}`}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
+                                 {/* 地図リンク */}
+                 <div className="flex space-x-2 mt-3">
+                   <a
+                     href={`https://www.google.com/maps/search/${encodeURIComponent(event.place)}`}
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                   >
+                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                     </svg>
+                     Google Maps
+                   </a>
+                   <a
+                     href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(event.place)}`}
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     className="flex-1 flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                   >
+                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7" />
+                     </svg>
+                     OpenStreetMap
+                   </a>
+                 </div>
               </div>
             )}
 
