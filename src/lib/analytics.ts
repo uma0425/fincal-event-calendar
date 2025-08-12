@@ -142,19 +142,30 @@ export async function getMonthlyStats(months: number = 6) {
       _count: {
         id: true,
       },
+      _sum: {
+        viewCount: true,
+        favoriteCount: true,
+      },
     });
 
     // 月別に集計
-    const monthlyData = new Map<string, number>();
+    const monthlyData = new Map<string, { events: number; views: number; favorites: number }>();
     
     stats.forEach((stat) => {
       const month = stat.createdAt.toISOString().slice(0, 7); // YYYY-MM
-      monthlyData.set(month, (monthlyData.get(month) || 0) + stat._count.id);
+      const existing = monthlyData.get(month) || { events: 0, views: 0, favorites: 0 };
+      monthlyData.set(month, {
+        events: existing.events + stat._count.id,
+        views: existing.views + (stat._sum.viewCount || 0),
+        favorites: existing.favorites + (stat._sum.favoriteCount || 0),
+      });
     });
 
-    return Array.from(monthlyData.entries()).map(([month, count]) => ({
+    return Array.from(monthlyData.entries()).map(([month, data]) => ({
       month,
-      events: count,
+      events: data.events,
+      views: data.views,
+      favorites: data.favorites,
     }));
   } catch (error) {
     console.error('Error getting monthly stats:', error);
