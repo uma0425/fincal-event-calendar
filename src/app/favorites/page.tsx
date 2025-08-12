@@ -25,39 +25,26 @@ export default function FavoritesPage() {
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        // ローカルストレージからお気に入りを取得（高速化）
-        const cachedFavorites = localStorage.getItem('favorites');
-        if (cachedFavorites) {
-          try {
-            const parsed = JSON.parse(cachedFavorites);
-            if (parsed && parsed.length > 0) {
-              setFavorites(parsed);
-              setLoading(false);
-            }
-          } catch (e) {
-            // キャッシュが破損している場合は無視
-          }
-        }
-        
-        // バックグラウンドで最新データを取得
+        // サーバーからお気に入りデータを取得
         const response = await fetch('/api/favorites')
         
         if (response.ok) {
           const data = await response.json()
-          const processedFavorites = data.favorites.map((fav: any) => ({
-            ...fav,
-            event: {
-              ...fav.event,
-              startAt: new Date(fav.event.startAt),
-              endAt: new Date(fav.event.endAt),
-              createdAt: new Date(fav.event.createdAt),
-              updatedAt: new Date(fav.event.updatedAt)
-            }
-          }))
-          setFavorites(processedFavorites)
-          
-          // キャッシュに保存
-          localStorage.setItem('favorites', JSON.stringify(processedFavorites));
+          if (data.success && data.favorites) {
+            const processedFavorites = data.favorites.map((fav: any) => ({
+              ...fav,
+              event: {
+                ...fav.event,
+                startAt: new Date(fav.event.startAt),
+                endAt: new Date(fav.event.endAt),
+                createdAt: new Date(fav.event.createdAt),
+                updatedAt: new Date(fav.event.updatedAt)
+              }
+            }))
+            setFavorites(processedFavorites)
+          } else {
+            setFavorites([])
+          }
         } else {
           throw new Error('お気に入りの取得に失敗しました')
         }
@@ -90,17 +77,24 @@ export default function FavoritesPage() {
     }
   }
 
-  const renderEvent = (favorite: FavoriteEvent) => (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative">
-      {/* 削除ボタン */}
-      <button
-        onClick={() => handleRemoveFavorite(favorite.eventId)}
-        className="absolute top-3 right-3 w-8 h-8 bg-red-500 bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200 z-10"
-      >
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+  const renderEvent = (favorite: FavoriteEvent) => {
+    // eventが存在しない場合は何も表示しない
+    if (!favorite.event) {
+      console.warn('Event not found for favorite:', favorite);
+      return null;
+    }
+
+    return (
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative">
+        {/* 削除ボタン */}
+        <button
+          onClick={() => handleRemoveFavorite(favorite.eventId)}
+          className="absolute top-3 right-3 w-8 h-8 bg-red-500 bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all duration-200 z-10"
+        >
+          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
 
       {/* イベント画像 */}
       <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
@@ -220,6 +214,7 @@ export default function FavoritesPage() {
       </div>
     </div>
   )
+  }
 
   if (loading) {
     return <LoadingPage message="お気に入りを読み込み中..." showProgress={true} />
@@ -315,9 +310,9 @@ export default function FavoritesPage() {
           </div>
         ) : (
           <LazyEventList
-            events={favorites.map(fav => fav.event)}
+            events={favorites.filter(fav => fav.event).map(fav => fav.event)}
             renderEvent={(event) => {
-              const favorite = favorites.find(fav => fav.event.id === event.id)
+              const favorite = favorites.find(fav => fav.event && fav.event.id === event.id)
               return favorite ? renderEvent(favorite) : null
             }}
           />
