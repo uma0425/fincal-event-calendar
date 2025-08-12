@@ -7,8 +7,10 @@ import { validateEventData, isValidFile, sanitizeHtml } from '@/lib/validation'
 import { handleFormError, retryOperation } from '@/lib/errorHandling'
 import Logo from '@/components/Logo'
 import RichTextEditor from '@/components/RichTextEditor'
+import CsvUploader from '@/components/CsvUploader'
 
 export default function SubmitPage() {
+  const [activeTab, setActiveTab] = useState<'single' | 'csv'>('single')
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -285,9 +287,38 @@ export default function SubmitPage() {
 
         {/* エラーメッセージ - 通知システムで代替されるため削除 */}
 
-        {/* フォーム */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <form onSubmit={handleSubmit} className="p-8">
+        {/* タブナビゲーション */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-8 px-8" aria-label="Tabs">
+              <button
+                onClick={() => setActiveTab('single')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'single'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                個別投稿
+              </button>
+              <button
+                onClick={() => setActiveTab('csv')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'csv'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                CSV一括アップロード
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {/* タブコンテンツ */}
+        {activeTab === 'single' ? (
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <form onSubmit={handleSubmit} className="p-8">
             {/* 基本情報セクション */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
@@ -720,6 +751,9 @@ export default function SubmitPage() {
             </div>
           </form>
         </div>
+      ) : (
+        <CsvUploader />
+      )}
       </div>
     </div>
   )
