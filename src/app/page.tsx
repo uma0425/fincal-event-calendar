@@ -15,7 +15,7 @@ import EventDetailPanel from '@/components/EventDetailPanel';
 import EventCardCompact from '@/components/EventCardCompact';
 import FilterChips from '@/components/FilterChips';
 import TitleLogo from '@/components/TitleLogo';
-import PopularEventsSection from '@/components/PopularEventsSection';
+
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -958,8 +958,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 人気イベントセクション */}
-        <PopularEventsSection className="mb-12" />
+
 
         {/* イベント表示 */}
         {viewMode === 'list' ? (
