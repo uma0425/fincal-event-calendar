@@ -15,16 +15,45 @@ const FavoriteContext = createContext<FavoriteContextType | undefined>(undefined
 export function FavoriteProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  // ローカルストレージからお気に入りを読み込み
+  // サーバーからお気に入りを読み込み
   useEffect(() => {
-    const savedFavorites = localStorage.getItem('favorites');
-    if (savedFavorites) {
+    const fetchFavorites = async () => {
       try {
-        setFavorites(JSON.parse(savedFavorites));
+        const response = await fetch('/api/favorites');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.favorites) {
+            const favoriteIds = data.favorites.map((fav: any) => fav.eventId);
+            setFavorites(favoriteIds);
+            // ローカルストレージにも保存
+            localStorage.setItem('favorites', JSON.stringify(favoriteIds));
+          }
+        } else {
+          // APIが失敗した場合はローカルストレージから読み込み
+          const savedFavorites = localStorage.getItem('favorites');
+          if (savedFavorites) {
+            try {
+              setFavorites(JSON.parse(savedFavorites));
+            } catch (error) {
+              console.error('お気に入りの読み込みエラー:', error);
+            }
+          }
+        }
       } catch (error) {
-        console.error('お気に入りの読み込みエラー:', error);
+        console.error('お気に入り取得エラー:', error);
+        // エラーの場合はローカルストレージから読み込み
+        const savedFavorites = localStorage.getItem('favorites');
+        if (savedFavorites) {
+          try {
+            setFavorites(JSON.parse(savedFavorites));
+          } catch (localError) {
+            console.error('ローカルストレージからの読み込みエラー:', localError);
+          }
+        }
       }
-    }
+    };
+
+    fetchFavorites();
   }, []);
 
   // お気に入りをローカルストレージに保存
@@ -44,11 +73,37 @@ export function FavoriteProvider({ children }: { children: React.ReactNode }) {
     return favorites.includes(eventId);
   };
 
-  const toggleFavorite = (eventId: string) => {
-    if (isFavorite(eventId)) {
-      removeFavorite(eventId);
-    } else {
-      addFavorite(eventId);
+  const toggleFavorite = async (eventId: string) => {
+    try {
+      if (isFavorite(eventId)) {
+        // お気に入りから削除
+        const response = await fetch(`/api/favorites?eventId=${eventId}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          removeFavorite(eventId);
+        } else {
+          console.error('お気に入り削除エラー:', response.status);
+        }
+      } else {
+        // お気に入りに追加
+        const response = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ eventId }),
+        });
+        
+        if (response.ok) {
+          addFavorite(eventId);
+        } else {
+          console.error('お気に入り追加エラー:', response.status);
+        }
+      }
+    } catch (error) {
+      console.error('お気に入り操作エラー:', error);
     }
   };
 

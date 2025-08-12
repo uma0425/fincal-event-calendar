@@ -93,6 +93,24 @@ END:VCALENDAR`
             updatedAt: new Date(data.event.updatedAt)
           }
           setEvent(eventData)
+          
+          // 閲覧記録を送信
+          try {
+            await fetch('/api/analytics/view', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                eventId: eventId,
+                userId: null, // ユーザー認証が実装されていないため
+                ipAddress: null, // サーバーサイドで取得する必要がある
+                userAgent: navigator.userAgent
+              })
+            });
+          } catch (viewError) {
+            console.error('閲覧記録エラー:', viewError);
+          }
         } else {
           throw new Error('イベントが見つかりません')
         }
