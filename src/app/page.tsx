@@ -374,6 +374,8 @@ export default function HomePage() {
           }
         });
         
+        console.log('API Response status:', response.status);
+        
         if (response.status === 503) {
           // データベース接続エラーの場合、サンプルデータを表示
           const sampleEvents: Event[] = [
@@ -454,7 +456,10 @@ export default function HomePage() {
           setError('データベース接続が設定されていません。サンプルデータを表示しています。');
         } else if (response.ok) {
           const data = await response.json();
+          console.log('API Response data:', data);
           const events = data.events || data.data || [];
+          console.log('Processed events:', events);
+          console.log('First event imageUrl:', events[0]?.imageUrl);
           
           if (events.length === 0) {
             // イベントが0件の場合、サンプルデータを表示

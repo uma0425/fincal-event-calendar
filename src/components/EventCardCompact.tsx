@@ -54,6 +54,17 @@ const EventCardCompact = memo(function EventCardCompact({
     }
   };
 
+  // デバッグ用：画像URLの状況をログ出力
+  console.log('EventCardCompact Debug:', {
+    id: event.id,
+    title: event.title,
+    imageUrl: event.imageUrl,
+    hasImageUrl: !!event.imageUrl,
+    imageUrlLength: event.imageUrl?.length,
+    imageUrlTrimmed: event.imageUrl?.trim(),
+    imageUrlTrimmedLength: event.imageUrl?.trim().length
+  });
+
   return (
     <div 
       className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden h-full"
@@ -62,13 +73,26 @@ const EventCardCompact = memo(function EventCardCompact({
       {/* Image section */}
       <div className="relative">
         <div className="relative w-full h-0 pb-[56.25%] overflow-hidden">
-          {event.imageUrl && event.imageUrl.trim() !== '' ? (
+          {(() => {
+            const hasValidImageUrl = event.imageUrl && event.imageUrl.trim() !== '';
+            console.log('Image display condition:', {
+              eventId: event.id,
+              imageUrl: event.imageUrl,
+              hasValidImageUrl,
+              willShowImage: hasValidImageUrl
+            });
+            return hasValidImageUrl;
+          })() ? (
             <img
               src={event.imageUrl}
               alt={event.title}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
               loading="lazy"
+              onLoad={() => {
+                console.log('Image loaded successfully:', event.id, event.imageUrl);
+              }}
               onError={(e) => {
+                console.log('Image load error:', event.id, event.imageUrl);
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
                 const placeholder = document.createElement('div');
@@ -83,9 +107,14 @@ const EventCardCompact = memo(function EventCardCompact({
             />
           ) : (
             <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-              <svg className="w-12 h-12 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+              {(() => {
+                console.log('Showing placeholder for event:', event.id, 'because imageUrl is invalid:', event.imageUrl);
+                return (
+                  <svg className="w-12 h-12 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                );
+              })()}
             </div>
           )}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
