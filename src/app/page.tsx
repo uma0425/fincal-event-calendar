@@ -367,6 +367,7 @@ export default function HomePage() {
         }
         
         // バックグラウンドで最新データを取得
+        console.log('Fetching events from API...');
         const response = await fetch('/api/events', {
           headers: {
             'Cache-Control': 'no-cache',
@@ -375,8 +376,10 @@ export default function HomePage() {
         });
         
         console.log('API Response status:', response.status);
+        console.log('API Response ok:', response.ok);
         
         if (response.status === 503) {
+          console.log('Database connection error, using sample data');
           // データベース接続エラーの場合、サンプルデータを表示
           const sampleEvents: Event[] = [
             {
@@ -461,9 +464,10 @@ export default function HomePage() {
           console.log('Processed events:', events);
           console.log('First event imageUrl:', events[0]?.imageUrl);
           
-          if (events.length === 0) {
-            // イベントが0件の場合、サンプルデータを表示
-            const sampleEvents: Event[] = [
+                      if (events.length === 0) {
+              console.log('No events found, using sample data');
+              // イベントが0件の場合、サンプルデータを表示
+              const sampleEvents: Event[] = [
               {
                 id: 'sample-1',
                 title: '会計士交流会',
@@ -537,9 +541,11 @@ export default function HomePage() {
                 shareCount: 5
               }
             ];
+            console.log('Setting sample events:', sampleEvents.length, 'events');
             setEvents(sampleEvents);
             setError('データベースからイベントが取得できませんでした。サンプルデータを表示しています。');
           } else {
+            console.log('Processing events from API:', events.length, 'events');
             // 日付文字列をDateオブジェクトに変換
             const processedEvents = events.map((event: any) => ({
               ...event,
@@ -549,6 +555,8 @@ export default function HomePage() {
               updatedAt: new Date(event.updatedAt)
             }));
             
+            console.log('Setting processed events:', processedEvents.length, 'events');
+            console.log('First processed event:', processedEvents[0]);
             setEvents(processedEvents);
           }
         } else {
