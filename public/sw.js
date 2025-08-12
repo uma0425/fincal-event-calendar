@@ -1,3 +1,8 @@
+// Service Workerを一時的に無効化
+console.log('Service Worker disabled for debugging');
+
+// コメントアウトしてService Workerを無効化
+/*
 const CACHE_NAME = 'fincal-v2.0.0';
 const STATIC_CACHE = 'fincal-static-v2.0.0';
 const DYNAMIC_CACHE = 'fincal-dynamic-v2.0.0';
@@ -241,4 +246,5 @@ self.addEventListener('notificationclick', (event) => {
       clients.openWindow('/')
     );
   }
-}); 
+});
+*/ 
