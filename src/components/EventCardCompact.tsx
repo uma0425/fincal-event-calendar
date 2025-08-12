@@ -2,7 +2,6 @@
 
 import { memo, useMemo } from 'react';
 import { Event } from '@prisma/client';
-import OptimizedImage from './OptimizedImage';
 import FavoriteButton from './FavoriteButton';
 
 interface EventCardCompactProps {
@@ -63,12 +62,32 @@ const EventCardCompact = memo(function EventCardCompact({
       {/* Image section */}
       <div className="relative">
         <div className="relative w-full h-0 pb-[56.25%] overflow-hidden">
-          <OptimizedImage
-            src={event.imageUrl || ''}
-            alt={event.title}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-            priority={false}
-          />
+          {event.imageUrl && event.imageUrl.trim() !== '' ? (
+            <img
+              src={event.imageUrl}
+              alt={event.title}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              loading="lazy"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const placeholder = document.createElement('div');
+                placeholder.className = 'absolute inset-0 w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center';
+                placeholder.innerHTML = `
+                  <svg class="w-12 h-12 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                `;
+                target.parentElement!.appendChild(placeholder);
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+              <svg className="w-12 h-12 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          )}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
             <FavoriteButton eventId={event.id} />
           </div>
@@ -103,8 +122,8 @@ const EventCardCompact = memo(function EventCardCompact({
             {event.organizer || '主催者未定'}
           </div>
           {event.place && (
-            <div className="text-xs text-gray-500 truncate">
-              {event.place}
+            <div className="text-xs text-gray-500 truncate max-w-full">
+              {event.place.length > 20 ? `${event.place.substring(0, 20)}...` : event.place}
             </div>
           )}
         </div>
