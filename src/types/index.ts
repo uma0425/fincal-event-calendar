@@ -17,11 +17,14 @@ export interface Event {
   imageUrl?: string
   prefecture?: string
   status: EventStatus
-  createdBy: string
+  createdBy?: string
   createdAt: Date
   updatedAt: Date
   maxParticipants?: number
   location?: string
+  viewCount?: number
+  favoriteCount?: number
+  shareCount?: number
 }
 
 export interface User {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useNotification } from '@/contexts/NotificationContext';
+import { useNotification } from '@/components/NotificationSystem';
 
 interface CsvEvent {
   title: string;
@@ -24,7 +24,23 @@ export default function CsvUploader() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [csvData, setCsvData] = useState<CsvEvent[]>([]);
   const [previewMode, setPreviewMode] = useState(false);
-  const { showNotification } = useNotification();
+  const { success, error, info } = useNotification();
+
+  const showNotification = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+    switch (type) {
+      case 'success':
+        success(message);
+        break;
+      case 'error':
+        error(message);
+        break;
+      case 'warning':
+        info(message);
+        break;
+      default:
+        info(message);
+    }
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
